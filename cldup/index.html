@@ -1,0 +1,3049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolsMandi — Central Control Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f8fafc;
+            --bg-card: #ffffff;
+            --border-color: rgba(226, 232, 240, 0.8);
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: rgba(79, 70, 229, 0.08);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --success-light: rgba(16, 185, 129, 0.08);
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger-light: rgba(239, 68, 68, 0.08);
+            --shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Layout Structure */
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-icon {
+            font-size: 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+        .logo-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .logout-btn:hover {
+            color: var(--danger);
+        }
+
+        /* Container & Navigation */
+        .wrapper {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 73px);
+            max-height: calc(100vh - 73px);
+            overflow: hidden;
+            position: relative;
+        }
+        .sidebar {
+            width: 250px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Bottom Nav Mobile */
+        .bottom-nav {
+            display: none;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 10px 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            justify-content: space-around;
+            z-index: 100;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.02);
+        }
+        .bnav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .bnav-item.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .bnav-icon {
+            font-size: 20px;
+        }
+
+        /* Main View */
+        main {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            min-height: 0;
+            height: 100%;
+            max-height: 100%;
+            padding-bottom: 80px; /* Mobile safety */
+        }
+        .page {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.3s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Headers & Metrics */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .page-title h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .page-title p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        /* Metric Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: var(--shadow);
+        }
+        .metric-label {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .metric-value {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--text-main) 0%, #475569 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Cards & Lists */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* Forms & Inputs */
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        .btn-danger-outline {
+            background: var(--danger-light);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-danger-outline:hover {
+            background: var(--danger);
+            color: #ffffff;
+        }
+        
+        /* Modal Overlay (Drawers) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 500px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .form-group {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .automation-preview-box {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 12px;
+            color: #334155;
+            line-height: 1.5;
+        }
+        .automation-preview-box code {
+            display: block;
+            margin-top: 6px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 11px;
+            word-break: break-all;
+            color: #1e293b;
+            background: #eef2ff;
+            padding: 8px 10px;
+            border-radius: 8px;
+        }
+        .automation-preview-title {
+            font-weight: 700;
+            font-size: 12px;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+        #modal-automation .modal-content {
+            max-width: 620px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            background: #f8fafc;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* Checkbox lists for reseller mappings */
+        .checkbox-list {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px;
+            background: #f8fafc;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Tables & Responsive Grid lists */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th {
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+        }
+        td {
+            padding: 14px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-danger { background: var(--danger-light); color: var(--danger); }
+        .badge-warning { background: rgba(245, 158, 11, 0.08); color: var(--warning); }
+
+        /* Login Layout */
+        .login-container {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+        }
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(79, 70, 229, 0.05);
+            text-align: center;
+        }
+        .login-card h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .login-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .bottom-nav { display: flex; }
+            main { padding: 16px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .btn-primary { width: 100%; justify-content: center; }
+            header { padding: 12px 16px; }
+            .logo-title { font-size: 16px; }
+            .user-badge { display: none; }
+            
+            /* Card Grid conversions for mobile */
+            table, thead, tbody, th, td, tr { display: block; }
+            thead tr { position: absolute; top: -9999px; left: -9999px; }
+            tr { border: 1px solid var(--border-color); border-radius: 16px; margin-bottom: 12px; padding: 10px; background: var(--bg-card); }
+            td { border: none; border-bottom: 1px solid rgba(226, 232, 240, 0.4); position: relative; padding-left: 50%; text-align: right; }
+            td:last-child { border-bottom: none; }
+            td:before {
+                position: absolute;
+                top: 14px;
+                left: 16px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                content: attr(data-label);
+                text-align: left;
+                font-weight: 600;
+                color: var(--text-muted);
+                font-size: 12px;
+            }
+        }
+
+        /* ── SECONDARY BUTTON ── */
+        .btn-secondary {
+            background: var(--bg-base);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+        .text-muted { color: var(--text-muted); }
+
+        /* ── CARD GRID VIEW FOR ACCOUNTS ── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .account-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.25s;
+        }
+        .account-card:hover {
+            border-color: rgba(79, 70, 229, 0.3);
+            box-shadow: 0 8px 32px -4px rgba(79, 70, 229, 0.12);
+            transform: translateY(-2px);
+        }
+        .account-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+        .account-card-name { font-size: 15px; font-weight: 700; color: var(--text-main); }
+        .account-card-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+        .account-card-body { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .account-card-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .account-card-label { color: var(--text-muted); font-weight: 500; }
+        .account-card-value {
+            font-weight: 600; color: var(--text-main); font-size: 12px;
+            max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right;
+        }
+        .account-card-actions { display: flex; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 14px; }
+        .account-card-actions button { flex: 1; }
+
+        /* ── TAB SWITCHER ── */
+        .tab-switcher {
+            display: flex;
+            background: var(--bg-base);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 2px;
+        }
+        .tab-btn {
+            background: transparent; border: none;
+            padding: 7px 18px; border-radius: 9px;
+            font-family: inherit; font-size: 13px; font-weight: 600;
+            color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--bg-card); color: var(--primary);
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+        }
+        .tab-btn:hover:not(.active) { color: var(--text-main); }
+
+        /* ── FILTER BAR ── */
+        .filter-bar {
+            display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+            margin-bottom: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 14px 18px;
+            box-shadow: var(--shadow);
+        }
+        .filter-bar .form-control { margin-bottom: 0; background: var(--bg-base); }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <!-- SPA loads dynamically here -->
+    </div>
+
+    <script>
+        // ── CORE STATE MANAGEMENT ────────────────────────────────────────────────
+        const State = {
+            authToken: localStorage.getItem('admin_token') || '',
+            user: JSON.parse(localStorage.getItem('admin_user') || 'null'),
+            activeTab: 'dashboard',
+            stats: { active_sessions: 0, accounts_total: 0, credit_hits_today: 0 },
+            accounts: [],
+            users: [],
+            sessions: [],
+            websites: [],
+            resellers: [],
+            violations: [],
+            products: [],
+            tools: [],
+            proxies: [],
+            automationDefaults: {
+                panel_base_url: window.location.origin,
+                default_automation_api_url: 'https://dashboard.seotoolscart.com/api/tasks/run',
+                global_ingest_token: '',
+                ingest_auth_header: 'Authorization: Bearer <token>',
+                ingest_env_hint: 'TOOLSMANDI_INGEST_TOKEN=<token>'
+            },
+            currentAutomationAccount: null
+        };
+
+        function getIngestTokenForAccount(account) {
+            if (!account) return State.automationDefaults?.global_ingest_token || '';
+            return (account.website_secret_key || '').trim() || State.automationDefaults?.global_ingest_token || '';
+        }
+
+        async function loadAutomationDefaults() {
+            const data = await apiFetch('/api/admin/automation/defaults');
+            if (data) {
+                State.automationDefaults = data;
+            }
+        }
+
+        function getPanelBaseUrl() {
+            return (State.automationDefaults?.panel_base_url || window.location.origin).replace(/\/$/, '');
+        }
+
+        function updateAutomationPreviews() {
+            const apiUrl = (document.getElementById('auto-api-url')?.value || '').trim()
+                || State.automationDefaults?.default_automation_api_url
+                || 'https://dashboard.seotoolscart.com/api/tasks/run';
+            const taskUID = (document.getElementById('auto-goauto-task')?.value || '').trim();
+            const ingestKey = (document.getElementById('auto-ingest-key')?.value || '').trim();
+            const panelBase = getPanelBaseUrl();
+            const ingestToken = getIngestTokenForAccount(State.currentAutomationAccount);
+
+            const tokenPreview = document.getElementById('auto-token-preview');
+            if (tokenPreview) {
+                tokenPreview.innerHTML = ingestToken ? `
+                    <div class="automation-preview-title">GoAuto Ingest Token (is website / tool ke liye)</div>
+                    <div>GoAuto server par ye env set karein:</div>
+                    <code>TOOLSMANDI_INGEST_TOKEN=${ingestToken}</code>
+                    <div style="margin-top:8px;font-size:11px;color:#64748b;">Ya header me: Authorization: Bearer ${ingestToken}</div>
+                ` : `
+                    <div class="automation-preview-title">GoAuto Ingest Token</div>
+                    <div style="color:#64748b;">Website ka handshake secret_key load nahi hua. Global token: ${State.automationDefaults?.global_ingest_token || 'config.json secret_key'}</div>
+                `;
+            }
+
+            const triggerPreview = document.getElementById('auto-trigger-preview');
+            if (triggerPreview) {
+                if (apiUrl && taskUID) {
+                    triggerPreview.innerHTML = `
+                        <div class="automation-preview-title">GoAuto Trigger — Full Request</div>
+                        <div>Logout par ye API call hogi:</div>
+                        <code>POST ${apiUrl}\nHeaders: Authorization: Bearer &lt;goauto_token&gt;\nBody: {"task_uid":"${taskUID}"}</code>
+                    `;
+                } else {
+                    triggerPreview.innerHTML = `
+                        <div class="automation-preview-title">GoAuto Trigger — Full Request</div>
+                        <div style="color:#64748b;">Trigger API URL aur Task UID dono bharte hi poora request yahan dikhega.</div>
+                    `;
+                }
+            }
+
+            const ingestPreview = document.getElementById('auto-ingest-preview');
+            if (ingestPreview) {
+                if (ingestKey) {
+                    ingestPreview.innerHTML = `
+                        <div class="automation-preview-title">Cookie Ingest — Full API URL</div>
+                        <div>Automation is ingest key se account dhundh kar cookie update karega:</div>
+                        <code>POST ${panelBase}/api/automation/ingest/${ingestKey}\nHeaders: Authorization: Bearer ${ingestToken || '<token>'}\nBody: {"cookie":"...","user_agent":"..."}</code>
+                    `;
+                } else {
+                    ingestPreview.innerHTML = `
+                        <div class="automation-preview-title">Cookie Ingest — Full API URL</div>
+                        <div style="color:#64748b;">Ingest Key bharte hi poora API URL yahan dikhega.</div>
+                    `;
+                }
+            }
+        }
+
+        // Router View Mapper
+        function navigate(tab) {
+            State.activeTab = tab;
+            document.querySelectorAll('.nav-item, .bnav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll(`[data-tab="${tab}"]`).forEach(el => el.classList.add('active'));
+            
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            const activePage = document.getElementById(`page-${tab}`);
+            if (activePage) activePage.classList.add('active');
+
+            // Trigger corresponding API loads
+            if (State.authToken) {
+                if (tab === 'dashboard') loadDashboard();
+                if (tab === 'accounts') loadAccounts();
+                if (tab === 'automate') loadAutomateTasks();
+                if (tab === 'users') loadUsers();
+                if (tab === 'sessions') loadSessions();
+                if (tab === 'websites') loadWebsites();
+                if (tab === 'resellers') loadResellers();
+                if (tab === 'usage') loadUsage();
+                if (tab === 'analytics') loadAnalytics();
+                if (tab === 'products') loadProducts();
+                if (tab === 'violations') loadViolations();
+                if (tab === 'proxies') loadProxies();
+            }
+        }
+
+        // Fetch Wrapper with session handling
+        async function apiFetch(endpoint, options = {}) {
+            try {
+                const res = await fetch(endpoint, options);
+                if (res.status === 401) {
+                    logout();
+                    return null;
+                }
+                if (!res.ok) {
+                    const errText = await res.text();
+                    let errMsg = 'API request failed';
+                    try {
+                        const errData = JSON.parse(errText);
+                        errMsg = errData.message || errData.error || errText || errMsg;
+                    } catch (_) {
+                        if (errText) errMsg = errText;
+                    }
+                    throw new Error(errMsg);
+                }
+                return await res.json();
+            } catch (err) {
+                alert('API Error: ' + err.message);
+                return null;
+            }
+        }
+
+        // Logout
+        function logout() {
+            fetch('/api/admin/auth/logout');
+            State.authToken = '';
+            State.user = null;
+            localStorage.clear();
+            renderApp();
+        }
+
+        // ── API DATA LOADERS ─────────────────────────────────────────────────────
+
+        async function loadDashboard() {
+            const data = await apiFetch('/api/admin/dashboard/stats');
+            if (data) {
+                State.stats = data;
+                document.getElementById('stat-sessions').innerText = data.active_sessions;
+                document.getElementById('stat-accounts').innerText = data.accounts_total;
+                document.getElementById('stat-credits').innerText = data.credit_hits_today;
+                
+                // Populate active user sessions in dashboard overview
+                const tbody = document.getElementById('dashboard-active-users-tbody');
+                if (tbody) {
+                    if (data.active_users_list && data.active_users_list.length > 0) {
+                        tbody.innerHTML = data.active_users_list.map(u => {
+                            const expDate = new Date(u.expires_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                            return `
+                                <tr>
+                                    <td data-label="Website">${u.website_name}</td>
+                                    <td data-label="Username"><strong>${u.username}</strong></td>
+                                    <td data-label="Client IP">${u.client_ip}</td>
+                                    <td data-label="Mapped Account"><span class="badge badge-success" style="font-size: 11px; padding: 2px 6px;">${u.assigned_account_name}</span></td>
+                                    <td data-label="Expiry Time (IST)">${expDate}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 12px;">No active user sessions.</td>
+                            </tr>
+                        `;
+                    }
+                }
+            }
+        }
+
+        async function loadAccounts() {
+            // Load mapped websites list for dropdowns
+            const webs = await apiFetch('/api/admin/websites');
+            if (webs) {
+                State.websites = webs;
+                const select = document.getElementById('acc-website');
+                if (select) {
+                    select.innerHTML = webs.map(w => `<option value="${w.id}">${w.name} (${w.domain})</option>`).join('');
+                }
+                const toolFilter = document.getElementById('acc-tool-filter');
+                if (toolFilter) {
+                    const cur = toolFilter.value;
+                    toolFilter.innerHTML = '<option value="">All Websites</option>' +
+                        webs.map(w => `<option value="${w.id}" ${cur == w.id ? 'selected' : ''}>${w.name} (${w.domain})</option>`).join('');
+                }
+            }
+            // Load resellers for filter
+            if (!State.resellers || State.resellers.length === 0) {
+                const resellers = await apiFetch('/api/admin/resellers');
+                if (resellers) { State.resellers = resellers; }
+            }
+            const resellerFilter = document.getElementById('acc-reseller-filter');
+            if (resellerFilter) {
+                const cur = resellerFilter.value;
+                resellerFilter.innerHTML = '<option value="">All Resellers</option>' +
+                    (State.resellers || []).map(r => `<option value="${r.id}" ${cur == r.id ? 'selected' : ''}>${r.username}</option>`).join('');
+            }
+            const data = await apiFetch('/api/admin/accounts');
+            if (data) {
+                State.accounts = data;
+                filterAccounts();
+            }
+        }
+
+        async function loadAutomateTasks() {
+            await loadAutomationDefaults();
+            const webs = await apiFetch('/api/admin/websites');
+            if (webs) {
+                State.websites = webs;
+                const toolFilter = document.getElementById('auto-tool-filter');
+                if (toolFilter) {
+                    const cur = toolFilter.value;
+                    toolFilter.innerHTML = '<option value="">All Websites</option>' +
+                        webs.map(w => `<option value="${w.id}" ${cur == w.id ? 'selected' : ''}>${w.name} (${w.domain})</option>`).join('');
+                }
+            }
+            const data = await apiFetch('/api/admin/accounts');
+            if (data) State.accounts = data;
+            filterAutomateTasks();
+        }
+
+        function filterAutomateTasks() {
+            const list = document.getElementById('automate-tasks-list');
+            if (!list) return;
+
+            const search = (document.getElementById('auto-search')?.value || '').toLowerCase().trim();
+            const toolFilter = document.getElementById('auto-tool-filter')?.value || '';
+            const statusFilter = document.getElementById('auto-status-filter')?.value || '';
+
+            let accounts = State.accounts || [];
+            if (search) {
+                accounts = accounts.filter(a => {
+                    const triggerUrl = (a.automation_api_url || State.automationDefaults?.default_automation_api_url || '').toLowerCase();
+                    const taskUID = (a.goauto_task_uid || '').toLowerCase();
+                    const ingestKey = (a.automation_ingest_key || '').toLowerCase();
+                    return a.name.toLowerCase().includes(search) ||
+                        (a.website_name || '').toLowerCase().includes(search) ||
+                        taskUID.includes(search) ||
+                        ingestKey.includes(search) ||
+                        triggerUrl.includes(search);
+                });
+            }
+            if (toolFilter) {
+                accounts = accounts.filter(a => String(a.website_id) === toolFilter);
+            }
+            if (statusFilter === 'configured') {
+                accounts = accounts.filter(a => {
+                    const taskUID = (a.goauto_task_uid || '').trim();
+                    const ingestKey = (a.automation_ingest_key || '').trim();
+                    return !!taskUID || !!ingestKey;
+                });
+            } else if (statusFilter === 'not_configured') {
+                accounts = accounts.filter(a => {
+                    const taskUID = (a.goauto_task_uid || '').trim();
+                    const ingestKey = (a.automation_ingest_key || '').trim();
+                    return !taskUID && !ingestKey;
+                });
+            }
+
+            if ((State.accounts || []).length === 0) {
+                list.innerHTML = `<div class="card" style="padding:24px;color:var(--text-muted);text-align:center;">Koi mapped account nahi mila. Pehle Mapped Accounts se account add karein.</div>`;
+                return;
+            }
+            if (accounts.length === 0) {
+                list.innerHTML = `<div class="card" style="padding:24px;color:var(--text-muted);text-align:center;">Koi account nahi mila. Search ya filter change karke try karein.</div>`;
+                return;
+            }
+
+            const base = getPanelBaseUrl();
+            list.innerHTML = accounts.map(a => {
+                const triggerUrl = (a.automation_api_url || State.automationDefaults?.default_automation_api_url || '').trim();
+                const taskUID = (a.goauto_task_uid || '').trim();
+                const ingestKey = (a.automation_ingest_key || '').trim();
+                const ingestToken = getIngestTokenForAccount(a);
+                const isConfigured = !!(triggerUrl && taskUID) || !!ingestKey;
+                return `
+                <div class="card" style="margin-bottom:16px;padding:20px;">
+                    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;">
+                        <div>
+                            <div style="font-weight:600;font-size:16px;">${a.name}</div>
+                            <div style="color:var(--text-muted);font-size:13px;margin-top:4px;">${a.website_name || ''}</div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <span class="badge badge-${isConfigured ? 'success' : 'danger'}">${isConfigured ? 'Automation Set' : 'Not Configured'}</span>
+                            <button class="btn-primary" style="padding:6px 12px;font-size:12px;" onclick="openEditAutomation(${a.id})">⚙️ Configure</button>
+                        </div>
+                    </div>
+                    <div style="margin-top:14px;display:grid;gap:10px;">
+                        <div>
+                            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">GoAuto Trigger API (per account / server)</div>
+                            <code style="font-size:12px;word-break:break-all;">${triggerUrl ? `POST ${triggerUrl}` : '— not set —'}</code>
+                        </div>
+                        <div>
+                            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">GoAuto Task UID</div>
+                            <code style="font-size:12px;word-break:break-all;">${taskUID || '— not set —'}</code>
+                        </div>
+                        <div>
+                            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Cookie Ingest API URL</div>
+                            <code style="font-size:12px;word-break:break-all;">${ingestKey ? `POST ${base}/api/automation/ingest/${ingestKey}` : '— not set —'}</code>
+                        </div>
+                        <div>
+                            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">GoAuto Ingest Token (TOOLSMANDI_INGEST_TOKEN)</div>
+                            <code style="font-size:12px;word-break:break-all;">${ingestToken || '— not set —'}</code>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        async function openEditAutomation(id) {
+            await loadAccounts();
+            const a = State.accounts.find(x => x.id === id);
+            if (!a) return;
+
+            State.currentAutomationAccount = a;
+            document.getElementById('auto-title').innerText = `Automation — ${a.name}`;
+            document.getElementById('auto-id').value = a.id;
+            document.getElementById('auto-website-id').value = a.website_id;
+            document.getElementById('auto-account-label').innerText = `${a.name} (${a.website_name || ''})`;
+            document.getElementById('auto-api-url').value = a.automation_api_url || State.automationDefaults?.default_automation_api_url || '';
+            document.getElementById('auto-goauto-task').value = a.goauto_task_uid || '';
+            document.getElementById('auto-ingest-key').value = a.automation_ingest_key || '';
+            updateAutomationPreviews();
+            openModal('automation');
+        }
+
+        async function saveAutomation(e) {
+            e.preventDefault();
+            const payload = {
+                id: parseInt(document.getElementById('auto-id').value),
+                website_id: parseInt(document.getElementById('auto-website-id').value),
+                automation_api_url: (document.getElementById('auto-api-url')?.value || '').trim(),
+                goauto_task_uid: (document.getElementById('auto-goauto-task')?.value || '').trim(),
+                automation_ingest_key: (document.getElementById('auto-ingest-key')?.value || '').trim()
+            };
+
+            const res = await apiFetch('/api/admin/accounts/automation', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res) {
+                closeModal('automation');
+                await loadAutomateTasks();
+            }
+        }
+
+        function filterAccounts() {
+            const search = (document.getElementById('acc-search')?.value || '').toLowerCase().trim();
+            const toolFilter = document.getElementById('acc-tool-filter')?.value || '';
+            const resellerFilter = document.getElementById('acc-reseller-filter')?.value || '';
+            let filtered = State.accounts || [];
+            if (search) {
+                filtered = filtered.filter(a =>
+                    a.name.toLowerCase().includes(search) ||
+                    (a.website_name || '').toLowerCase().includes(search)
+                );
+            }
+            if (toolFilter) {
+                filtered = filtered.filter(a => String(a.website_id) === toolFilter);
+            }
+            if (resellerFilter) {
+                const reseller = (State.resellers || []).find(r => String(r.id) === resellerFilter);
+                if (reseller && reseller.websites) {
+                    filtered = filtered.filter(a => reseller.websites.includes(parseInt(a.website_id)));
+                }
+            }
+            const grid = document.getElementById('accounts-cards-grid');
+            if (!grid) return;
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px;font-size:15px;">No accounts found matching your filters.</div>`;
+                return;
+            }
+            grid.innerHTML = filtered.map(a => `
+                <div class="account-card">
+                    <div class="account-card-header">
+                        <div>
+                            <div class="account-card-name">${a.name}</div>
+                            <div class="account-card-meta">${a.website_name}</div>
+                        </div>
+                        <div style="display:flex;gap:5px;flex-direction:column;align-items:flex-end;">
+                            <span class="badge badge-${a.status === 'active' ? 'success' : 'danger'}">${a.status}</span>
+                            ${a.show_limit ? '<span class="badge badge-success" style="font-size:10px;padding:2px 5px;">Limit Visible</span>' : '<span class="badge badge-danger" style="font-size:10px;padding:2px 5px;">Limit Hidden</span>'}
+                        </div>
+                    </div>
+                    <div class="account-card-body">
+                        <div class="account-card-row">
+                            <span class="account-card-label">Proxy</span>
+                            <span class="account-card-value">${a.proxy || 'Direct Connection'}</span>
+                        </div>
+                        <div class="account-card-row">
+                            <span class="account-card-label">Failure Count</span>
+                            <span class="account-card-value">${a.failure_count}</span>
+                        </div>
+                    </div>
+                    <div class="account-card-actions">
+                        <button class="btn-primary" style="padding:7px 12px;font-size:12px;justify-content:center;" onclick="openEditAccount(${a.id})">✏️ Edit</button>
+                        <button class="btn-danger-outline" style="padding:7px 12px;font-size:12px;" onclick="deleteAccount(${a.id})">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        let usersActiveTab = 'all';
+
+        function setUsersTab(tab) {
+            usersActiveTab = tab;
+            document.getElementById('users-tab-all').classList.toggle('active', tab === 'all');
+            document.getElementById('users-tab-custom').classList.toggle('active', tab === 'custom');
+            filterUsers();
+        }
+
+        function filterUsers() {
+            const query = (document.getElementById('users-search')?.value || '').toLowerCase().trim();
+            const toolFilter = document.getElementById('users-tool-filter')?.value || '';
+            const tbody = document.getElementById('users-tbody');
+            if (!tbody || !State.users) return;
+            const filtered = State.users.filter(u => {
+                const matchesSearch = u.username.toLowerCase().includes(query) || u.website_name.toLowerCase().includes(query);
+                const matchesTab = usersActiveTab === 'all' || (usersActiveTab === 'custom' && u.custom_limit_expire_at !== null);
+                const matchesTool = !toolFilter || String(u.website_id) === toolFilter;
+                return matchesSearch && matchesTab && matchesTool;
+            });
+            tbody.innerHTML = filtered.map(u => {
+                const expireDateStr = u.custom_limit_expire_at ? u.custom_limit_expire_at.split(' ')[0] : '<span class="text-muted">Always</span>';
+                return `
+                    <tr>
+                        <td data-label="Website">${u.website_name}</td>
+                        <td data-label="Username">${u.username}</td>
+                        <td data-label="${u.limit_label_1}">${u.used_credits} / ${u.credit_limit}</td>
+                        <td data-label="${u.limit_label_2 || 'Secondary Limit'}">${u.limit_label_2 ? u.export_limit : '<span class="text-muted">—</span>'}</td>
+                        <td data-label="Expire Date">${expireDateStr}</td>
+                        <td data-label="Status"><span class="badge badge-${u.status === 'active' ? 'success' : 'danger'}">${u.status}</span></td>
+                        <td data-label="Actions">
+                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px;" onclick="openEditUser(${u.id})">Edit Quotas</button>
+                            <button class="btn-danger-outline" style="padding: 4px 8px; font-size: 12px; margin-left: 4px;" onclick="deleteUserLimit(${u.id})">Delete Limit</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function loadUsers() {
+            if (!State.websites || State.websites.length === 0) {
+                const webs = await apiFetch('/api/admin/websites');
+                if (webs) { State.websites = webs; }
+            }
+            const toolFilter = document.getElementById('users-tool-filter');
+            if (toolFilter && State.websites) {
+                const cur = toolFilter.value;
+                toolFilter.innerHTML = '<option value="">All Websites</option>' +
+                    State.websites.map(w => `<option value="${w.id}" ${cur == w.id ? 'selected' : ''}>${w.name} (${w.domain})</option>`).join('');
+            }
+            const data = await apiFetch('/api/admin/users');
+            if (data) {
+                State.users = data;
+                filterUsers();
+            }
+        }
+
+        async function loadSessions() {
+            // Ensure healthy accounts lists are present to map dropdown selections
+            const accountsData = await apiFetch('/api/admin/accounts');
+            if (accountsData) {
+                State.accounts = accountsData;
+            }
+
+            const data = await apiFetch('/api/admin/sessions');
+            if (data) {
+                State.sessions = data;
+                const tbody = document.getElementById('sessions-tbody');
+                if (tbody) {
+                    tbody.innerHTML = data.map(s => {
+                        // Filter healthy accounts for this session's target website
+                        const webAccs = (State.accounts || []).filter(a => parseInt(a.website_id) === parseInt(s.website_id) && a.status === 'active');
+                        const optionsHtml = [
+                            `<option value="0">Auto-Switching (Failover)</option>`,
+                            ...webAccs.map(a => `<option value="${a.id}" ${parseInt(s.assigned_account_id) === parseInt(a.id) ? 'selected' : ''}>${a.name}</option>`)
+                        ].join('');
+
+                        // Timezone-aware date parsing strictly in IST Offset
+                        const expiresStr = new Date(s.expires_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+                        return `
+                            <tr>
+                                <td data-label="Website">${s.website_name}</td>
+                                <td data-label="User">${s.username}</td>
+                                <td data-label="Client IP">${s.client_ip}</td>
+                                <td data-label="Assigned Proxy Account">
+                                    <select class="form-control" style="padding: 4px 8px; font-size: 13px; margin: 0; width: 180px;" onchange="changeSessionAccount('${s.session_token}', this.value)">
+                                        ${optionsHtml}
+                                    </select>
+                                </td>
+                                <td data-label="Expires At (IST)">${expiresStr}</td>
+                                <td data-label="Action">
+                                    <button class="btn-danger-outline" onclick="killSession('${s.session_token}')">Kill Session</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+
+        async function changeSessionAccount(token, accountId) {
+            const res = await apiFetch('/api/admin/sessions', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_token: token, account_id: parseInt(accountId) })
+            });
+            if (res) {
+                alert('Session mapped proxy account updated successfully! Auto-failover dynamic routing modified.');
+                loadSessions();
+            }
+        }
+
+        async function loadUsage() {
+            if (!State.websites || State.websites.length === 0) {
+                const webs = await apiFetch('/api/admin/websites');
+                if (webs) { State.websites = webs; }
+            }
+            const toolFilter = document.getElementById('usage-tool-filter');
+            if (toolFilter) {
+                const cur = toolFilter.value;
+                toolFilter.innerHTML = '<option value="">All Websites</option>' +
+                    (State.websites || []).map(w => `<option value="${w.id}" ${cur == w.id ? 'selected' : ''}>${w.name} (${w.domain})</option>`).join('');
+            }
+            const search = document.getElementById('usage-search')?.value || '';
+            const websiteId = document.getElementById('usage-tool-filter')?.value || '';
+            let url = `/api/admin/usage?search=${encodeURIComponent(search)}`;
+            if (websiteId) url += `&website_id=${encodeURIComponent(websiteId)}`;
+            const data = await apiFetch(url);
+            const tbody = document.getElementById('usage-tbody');
+            if (tbody && data) {
+                tbody.innerHTML = data.map(u => `
+                    <tr>
+                        <td data-label="Website Name">${u.website_name}</td>
+                        <td data-label="Username"><strong>${u.username}</strong></td>
+                        <td data-label="Daily Credits Used / Limit">
+                            <strong>${u.used_credits}</strong> / <span class="text-muted">${u.credit_limit}</span>
+                        </td>
+                        <td data-label="Weekly Export Rows Used / Limit">
+                            <strong>${u.used_exports.toLocaleString()}</strong> / <span class="text-muted">${u.export_limit.toLocaleString()}</span>
+                        </td>
+                        <td data-label="Status">
+                            <span class="badge badge-${u.status === 'active' ? 'success' : 'danger'}">${u.status}</span>
+                        </td>
+                        <td data-label="Actions">
+                            <button class="btn-primary" style="padding: 4px 12px; font-size: 12px; border-radius: 8px;" onclick="viewDetailedLogs('${u.username}', ${u.website_id})">🔍 View Detailed Logs</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        let activeDetailsUser = '';
+        let activeDetailsWebsite = '';
+
+        async function viewDetailedLogs(username, websiteId) {
+            activeDetailsUser = username;
+            activeDetailsWebsite = websiteId;
+            document.getElementById('usage-details-title').innerText = `Detailed Usage Logs for: ${username}`;
+            document.getElementById('usage-details-search').value = '';
+            openModal('usage-details');
+            await loadDetailedLogs();
+            
+            // Wire listeners once
+            const detailsSearchBtn = document.getElementById('usage-details-search-btn');
+            if (detailsSearchBtn) {
+                detailsSearchBtn.onclick = loadDetailedLogs;
+            }
+            const detailsSearchInput = document.getElementById('usage-details-search');
+            if (detailsSearchInput) {
+                detailsSearchInput.oninput = loadDetailedLogs;
+            }
+        }
+
+        async function loadDetailedLogs() {
+            const search = document.getElementById('usage-details-search').value || '';
+            const data = await apiFetch(`/api/admin/usage?username=${encodeURIComponent(activeDetailsUser)}&website_id=${encodeURIComponent(activeDetailsWebsite)}&search=${encodeURIComponent(search)}`);
+            const tbody = document.getElementById('usage-details-tbody');
+            if (tbody && data) {
+                if (data.length > 0) {
+                    tbody.innerHTML = data.map(l => {
+                        const timeStr = new Date(l.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                        const badgeClass = l.log_type === 'credit' ? 'success' : 'warning';
+                        const labelText = l.log_type === 'credit' ? 'Daily Credit Hit' : 'Export Rows';
+                        return `
+                            <tr>
+                                <td data-label="Log Type"><span class="badge badge-${badgeClass}">${labelText}</span></td>
+                                <td data-label="Usage value"><strong>${l.value.toLocaleString()}</strong></td>
+                                <td data-label="Target Path"><code>${l.endpoint}</code></td>
+                                <td data-label="Timestamp (IST)">${timeStr}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 12px;">No log records found.</td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        // ── 📦 ALLOWED PRODUCTS CRUD ──────────────────────────────────────────────
+
+        async function loadProducts() {
+            if (!State.websites || State.websites.length === 0) {
+                const webs = await apiFetch('/api/admin/websites');
+                if (webs) { State.websites = webs; }
+            }
+            const websiteFilter = document.getElementById('products-website-filter');
+            if (websiteFilter) {
+                const cur = websiteFilter.value;
+                websiteFilter.innerHTML = '<option value="">All Websites</option>' +
+                    (State.websites || []).map(w => `<option value="${w.id}" ${cur == w.id ? 'selected' : ''}>${w.name} (${w.domain})</option>`).join('');
+            }
+            const data = await apiFetch('/api/admin/products');
+            if (data) {
+                State.products = data;
+                filterProducts();
+            }
+        }
+
+        function filterProducts() {
+            const search = (document.getElementById('products-search')?.value || '').toLowerCase().trim();
+            const websiteFilter = document.getElementById('products-website-filter')?.value || '';
+            let filtered = State.products || [];
+            if (search) {
+                filtered = filtered.filter(p =>
+                    (p.product_name || '').toLowerCase().includes(search) ||
+                    String(p.product_id).includes(search) ||
+                    (p.website_name || '').toLowerCase().includes(search)
+                );
+            }
+            if (websiteFilter) {
+                filtered = filtered.filter(p => String(p.website_id) === websiteFilter);
+            }
+            const tbody = document.getElementById('products-tbody');
+            if (!tbody) return;
+            if (filtered.length > 0) {
+                tbody.innerHTML = filtered.map(p => `
+                    <tr>
+                        <td data-label="ID">${p.id}</td>
+                        <td data-label="Website / Domain"><strong>${p.website_name || 'All'}</strong></td>
+                        <td data-label="Product ID"><code>${p.product_id}</code></td>
+                        <td data-label="Product Name">${p.product_name || '<span class="text-muted">No description</span>'}</td>
+                        <td data-label="Created At">${new Date(p.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+                        <td data-label="Actions">
+                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px;" onclick="openEditProduct(${p.id})">Edit</button>
+                            <button class="btn-danger-outline" style="padding: 4px 8px; font-size: 12px;" onclick="deleteProduct(${p.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:18px;">No product IDs found matching your filters.</td></tr>`;
+            }
+        }
+
+        function openAddProduct() {
+            document.getElementById('prod-id').value = '';
+            document.getElementById('prod-product-id').value = '';
+            document.getElementById('prod-name').value = '';
+            
+            const select = document.getElementById('prod-website');
+            if (select) {
+                select.innerHTML = (State.websites || []).map(w => `<option value="${w.id}">${w.name} (${w.domain})</option>`).join('');
+            }
+
+            document.getElementById('prod-title').innerText = 'Add Allowed Product ID';
+            openModal('product');
+        }
+
+        function openEditProduct(id) {
+            const p = State.products.find(item => item.id === id);
+            if (p) {
+                document.getElementById('prod-id').value = p.id;
+                document.getElementById('prod-product-id').value = p.product_id;
+                document.getElementById('prod-name').value = p.product_name;
+
+                const select = document.getElementById('prod-website');
+                if (select) {
+                    select.innerHTML = (State.websites || []).map(w => `<option value="${w.id}">${w.name} (${w.domain})</option>`).join('');
+                    select.value = p.website_id;
+                }
+
+                document.getElementById('prod-title').innerText = 'Edit Allowed Product ID';
+                openModal('product');
+            }
+        }
+
+        async function saveProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('prod-id').value;
+            const payload = {
+                website_id: parseInt(document.getElementById('prod-website').value),
+                product_id: document.getElementById('prod-product-id').value.trim(),
+                product_name: document.getElementById('prod-name').value
+            };
+            if (id) {
+                payload.id = parseInt(id);
+            }
+
+            const res = await apiFetch('/api/admin/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res) {
+                closeModal('product');
+                loadProducts();
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('Are you sure you want to remove this Product ID configuration? Users with only this product ID will be blocked from access!')) {
+                const res = await apiFetch(`/api/admin/products?id=${id}`, { method: 'DELETE' });
+                if (res) loadProducts();
+            }
+        }
+
+        // ── 🚫 VIOLATIONS LOGS ───────────────────────────────────────────────────
+
+        async function loadViolations() {
+            if (!State.websites || State.websites.length === 0) {
+                const webs = await apiFetch('/api/admin/websites');
+                if (webs) { State.websites = webs; }
+            }
+            const toolFilter = document.getElementById('violations-tool-filter');
+            if (toolFilter) {
+                const cur = toolFilter.value;
+                toolFilter.innerHTML = '<option value="">All Websites</option>' +
+                    (State.websites || []).map(w => `<option value="${w.id}" ${cur == w.id ? 'selected' : ''}>${w.name} (${w.domain})</option>`).join('');
+            }
+            const data = await apiFetch('/api/admin/violations');
+            if (data) {
+                State.violations = data;
+                filterViolations();
+            }
+        }
+
+        function filterViolations() {
+            const search = (document.getElementById('violations-search')?.value || '').toLowerCase().trim();
+            const toolFilterId = document.getElementById('violations-tool-filter')?.value || '';
+            let filtered = State.violations || [];
+            if (search) {
+                filtered = filtered.filter(v =>
+                    (v.username || '').toLowerCase().includes(search) ||
+                    (v.client_ip || '').toLowerCase().includes(search)
+                );
+            }
+            if (toolFilterId) {
+                const selWeb = (State.websites || []).find(w => String(w.id) === toolFilterId);
+                if (selWeb) { filtered = filtered.filter(v => v.website_name === selWeb.name); }
+            }
+            const tbody = document.getElementById('violations-tbody');
+            if (!tbody) return;
+            if (filtered.length > 0) {
+                tbody.innerHTML = filtered.map(v => `
+                    <tr>
+                        <td data-label="Website">${v.website_name}</td>
+                        <td data-label="Username"><strong>${v.username}</strong></td>
+                        <td data-label="Client IP">${v.client_ip}</td>
+                        <td data-label="Attempted Path"><code style="color: var(--danger); font-weight: 600;">${v.attempted_path}</code></td>
+                        <td data-label="Timestamp (IST)">${new Date(v.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:18px;">No violations found matching your filters. System is secure!</td></tr>`;
+            }
+        }
+
+        // ── ANALYTICS ────────────────────────────────────────────────────────────
+
+        let analyticsCurrentTab = 'logins';
+        let analyticsLoginPage = 1;
+        let analyticsSwitchPage = 1;
+
+        function switchAnalyticsTab(tab) {
+            analyticsCurrentTab = tab;
+            document.getElementById('analytics-logins-section').style.display = tab === 'logins' ? '' : 'none';
+            document.getElementById('analytics-switches-section').style.display = tab === 'switches' ? '' : 'none';
+            document.getElementById('analytics-tab-logins').className = tab === 'logins' ? 'btn-primary' : 'btn-secondary';
+            document.getElementById('analytics-tab-switches').className = tab === 'switches' ? 'btn-primary' : 'btn-secondary';
+            // hide search bar on switches tab
+            const searchEl = document.getElementById('analytics-search');
+            if (searchEl) searchEl.style.display = tab === 'logins' ? '' : 'none';
+            if (tab === 'logins') loadAnalyticsLogins(1);
+            else loadAnalyticsSwitches(1);
+        }
+
+        async function loadAnalytics() {
+            // Populate website filter dropdown
+            const webs = await apiFetch('/api/admin/websites');
+            if (webs) {
+                const sel = document.getElementById('analytics-website-filter');
+                if (sel) {
+                    const cur = sel.value;
+                    sel.innerHTML = '<option value="">All Websites</option>' +
+                        webs.map(w => `<option value="${w.id}" ${cur == w.id ? 'selected' : ''}>${w.name} (${w.domain})</option>`).join('');
+                }
+            }
+            if (analyticsCurrentTab === 'logins') loadAnalyticsLogins(1);
+            else loadAnalyticsSwitches(1);
+        }
+
+        function parseDevice(ua) {
+            if (!ua) return 'Unknown';
+            if (/mobile/i.test(ua)) return '📱 Mobile';
+            if (/tablet|ipad/i.test(ua)) return '📟 Tablet';
+            // Browser detection
+            let browser = 'Browser';
+            if (/Edg\//i.test(ua)) browser = 'Edge';
+            else if (/OPR\//i.test(ua)) browser = 'Opera';
+            else if (/Firefox\//i.test(ua)) browser = 'Firefox';
+            else if (/Chrome\//i.test(ua)) browser = 'Chrome';
+            else if (/Safari\//i.test(ua)) browser = 'Safari';
+            // OS
+            let os = '';
+            if (/Windows/i.test(ua)) os = ' / Windows';
+            else if (/Mac OS/i.test(ua)) os = ' / macOS';
+            else if (/Linux/i.test(ua)) os = ' / Linux';
+            else if (/Android/i.test(ua)) os = ' / Android';
+            else if (/iOS|iPhone|iPad/i.test(ua)) os = ' / iOS';
+            return '🖥️ ' + browser + os;
+        }
+
+        async function loadAnalyticsLogins(page) {
+            if (page) analyticsLoginPage = page;
+            const websiteID = document.getElementById('analytics-website-filter')?.value || '';
+            const search = document.getElementById('analytics-search')?.value || '';
+            let url = `/api/admin/analytics/logins?page=${analyticsLoginPage}&limit=50`;
+            if (websiteID) url += `&website_id=${encodeURIComponent(websiteID)}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+
+            const data = await apiFetch(url);
+            if (!data) return;
+
+            const tbody = document.getElementById('analytics-logins-body');
+            const countEl = document.getElementById('analytics-logins-count');
+            if (countEl) countEl.textContent = `(${data.total} records)`;
+            if (tbody) {
+                if (data.logins.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#aaa;padding:24px;">No login records found.</td></tr>`;
+                } else {
+                    tbody.innerHTML = data.logins.map(l => `
+                        <tr>
+                            <td data-label="Username"><strong>${l.username}</strong></td>
+                            <td data-label="IP Address"><code>${l.client_ip}</code></td>
+                            <td data-label="Device">${parseDevice(l.user_agent)}</td>
+                            <td data-label="Website">${l.domain}</td>
+                            <td data-label="Login Time">${l.logged_in_at}</td>
+                        </tr>`).join('');
+                }
+            }
+            // Pagination
+            const pagEl = document.getElementById('analytics-logins-pagination');
+            if (pagEl) {
+                const totalPages = Math.max(1, Math.ceil(data.total / data.limit));
+                pagEl.innerHTML = `
+                    <span style="color:#888;font-size:13px;">Page ${analyticsLoginPage} of ${totalPages}</span>
+                    <button class="btn-secondary" style="padding:5px 12px;font-size:12px;" onclick="loadAnalyticsLogins(${analyticsLoginPage - 1})" ${analyticsLoginPage <= 1 ? 'disabled' : ''}>← Prev</button>
+                    <button class="btn-secondary" style="padding:5px 12px;font-size:12px;" onclick="loadAnalyticsLogins(${analyticsLoginPage + 1})" ${analyticsLoginPage >= totalPages ? 'disabled' : ''}>Next →</button>
+                `;
+            }
+        }
+
+        async function loadAnalyticsSwitches(page) {
+            if (page) analyticsSwitchPage = page;
+            const websiteID = document.getElementById('analytics-website-filter')?.value || '';
+            let url = `/api/admin/analytics/switches?page=${analyticsSwitchPage}&limit=50`;
+            if (websiteID) url += `&website_id=${encodeURIComponent(websiteID)}`;
+
+            const data = await apiFetch(url);
+            if (!data) return;
+
+            const tbody = document.getElementById('analytics-switches-body');
+            const countEl = document.getElementById('analytics-switches-count');
+            if (countEl) countEl.textContent = `(${data.total} records)`;
+            if (tbody) {
+                if (data.switches.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#aaa;padding:24px;">No switch events recorded yet.</td></tr>`;
+                } else {
+                    tbody.innerHTML = data.switches.map(s => `
+                        <tr>
+                            <td data-label="Username"><strong>${s.username || '—'}</strong></td>
+                            <td data-label="From"><span class="badge badge-warning">${s.from_account_name || '—'}</span></td>
+                            <td data-label="To"><span class="badge badge-success">→ ${s.to_account_name || '—'}</span></td>
+                            <td data-label="Reason" style="font-size:12px;max-width:200px;">${s.reason || '—'}</td>
+                            <td data-label="Website">${s.domain}</td>
+                            <td data-label="Switched At">${s.switched_at}</td>
+                        </tr>`).join('');
+                }
+            }
+            const pagEl = document.getElementById('analytics-switches-pagination');
+            if (pagEl) {
+                const totalPages = Math.max(1, Math.ceil(data.total / data.limit));
+                pagEl.innerHTML = `
+                    <span style="color:#888;font-size:13px;">Page ${analyticsSwitchPage} of ${totalPages}</span>
+                    <button class="btn-secondary" style="padding:5px 12px;font-size:12px;" onclick="loadAnalyticsSwitches(${analyticsSwitchPage - 1})" ${analyticsSwitchPage <= 1 ? 'disabled' : ''}>← Prev</button>
+                    <button class="btn-secondary" style="padding:5px 12px;font-size:12px;" onclick="loadAnalyticsSwitches(${analyticsSwitchPage + 1})" ${analyticsSwitchPage >= totalPages ? 'disabled' : ''}>Next →</button>
+                `;
+            }
+        }
+
+        async function loadWebsites() {
+            const tools = await apiFetch('/api/admin/tools');
+            if (tools) {
+                State.tools = tools;
+                const select = document.getElementById('web-tool');
+                if (select) {
+                    select.innerHTML = tools.map(t => `<option value="${t.id}">${t.name} (${t.category.toUpperCase()})</option>`).join('');
+                }
+            }
+            const data = await apiFetch('/api/admin/websites');
+            if (data) {
+                State.websites = data;
+                filterWebsites();
+            }
+        }
+
+        function filterWebsites() {
+            const search = (document.getElementById('websites-search')?.value || '').toLowerCase().trim();
+            let filtered = State.websites || [];
+            if (search) {
+                filtered = filtered.filter(w =>
+                    w.name.toLowerCase().includes(search) ||
+                    w.domain.toLowerCase().includes(search) ||
+                    (w.tool_name || '').toLowerCase().includes(search)
+                );
+            }
+            const tbody = document.getElementById('websites-tbody');
+            if (!tbody) return;
+            if (filtered.length > 0) {
+                tbody.innerHTML = filtered.map(w => `
+                    <tr>
+                        <td data-label="ID">${w.id}</td>
+                        <td data-label="Tool">${w.tool_name} (${w.tool_category.toUpperCase()})</td>
+                        <td data-label="Website Name">${w.name}</td>
+                        <td data-label="Domain">${w.domain}</td>
+                        <td data-label="Handshake Key"><code>${w.secret_key}</code></td>
+                        <td data-label="Expiry">${w.session_duration} mins</td>
+                        <td data-label="Action">
+                            <button class="btn-primary" style="padding: 4px 8px; font-size: 12px; margin-right: 5px;" onclick="openEditWebsite(${w.id})">Edit</button>
+                            <button class="btn-danger-outline" style="padding: 4px 8px; font-size: 12px;" onclick="deleteWebsite(${w.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:18px;">No domains found matching your search.</td></tr>`;
+            }
+        }
+
+        async function loadResellers() {
+            // Load mapped websites lists for resellers mapping check list
+            const webs = await apiFetch('/api/admin/websites');
+            if (webs) {
+                State.websites = webs;
+                const cList = document.getElementById('reseller-websites-checklist');
+                if (cList) {
+                    cList.innerHTML = webs.map(w => `
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="websites" value="${w.id}" id="chk-web-${w.id}">
+                            <label for="chk-web-${w.id}">${w.name} (${w.domain})</label>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            const data = await apiFetch('/api/admin/resellers');
+            if (data) {
+                State.resellers = data;
+                const tbody = document.getElementById('resellers-tbody');
+                if (tbody) {
+                    tbody.innerHTML = data.map(r => `
+                        <tr>
+                            <td data-label="Reseller ID">${r.id}</td>
+                            <td data-label="Username">${r.username}</td>
+                            <td data-label="Role"><span class="badge badge-success">${r.role}</span></td>
+                            <td data-label="Status"><span class="badge badge-${r.status === 'active' ? 'success' : 'danger'}">${r.status}</span></td>
+                            <td data-label="Mapped Domains">${r.websites ? r.websites.length : 0} Website(s)</td>
+                            <td data-label="Actions">
+                                <button class="btn-primary" style="padding: 4px 8px; font-size: 12px;" onclick="openEditReseller(${r.id})">Edit Config</button>
+                                <button class="btn-danger-outline" style="padding: 4px 8px; font-size: 12px;" onclick="deleteReseller(${r.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+        }
+
+        // ── WRITE ACTIONS & WRAPPER HANDLERS ─────────────────────────────────────
+
+        async function saveAccount(e) {
+            e.preventDefault();
+            const id = document.getElementById('acc-id').value;
+            // Get proxy value: from selector if not manual, else from manual input
+            const proxySelect = document.getElementById('acc-proxy-select');
+            const proxyManual = document.getElementById('acc-proxy-manual');
+            let proxyVal = '';
+            if (proxySelect && proxySelect.value === '__manual__') {
+                proxyVal = proxyManual ? proxyManual.value.trim() : '';
+            } else if (proxySelect && proxySelect.value) {
+                proxyVal = proxySelect.value;
+            }
+            const payload = {
+                website_id: parseInt(document.getElementById('acc-website').value),
+                name: document.getElementById('acc-name').value,
+                cookie: document.getElementById('acc-cookie').value,
+                user_agent: document.getElementById('acc-ua').value,
+                proxy: proxyVal,
+                show_limit: document.getElementById('acc-show-limit').checked
+            };
+
+            let res;
+            if (id) {
+                payload.id = parseInt(id);
+                payload.status = document.getElementById('acc-status').value;
+                res = await apiFetch('/api/admin/accounts', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                res = await apiFetch('/api/admin/accounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            if (res) {
+                closeModal('account');
+                await loadAccounts();
+            }
+        }
+
+        async function deleteAccount(id) {
+            if (confirm('Are you sure you want to delete this Ahrefs account?')) {
+                const res = await apiFetch(`/api/admin/accounts?id=${id}`, { method: 'DELETE' });
+                if (res) loadAccounts();
+            }
+        }
+
+        async function saveUser(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('user-id').value || '0');
+            const payload = {
+                id: id,
+                website_id: id === 0 ? parseInt(document.getElementById('user-website').value) : parseInt(document.getElementById('user-website-id').value),
+                username: id === 0 ? document.getElementById('user-username').value : '',
+                credit_limit: parseInt(document.getElementById('user-limit1').value),
+                export_limit: parseInt(document.getElementById('user-limit2').value || '0'),
+                status: document.getElementById('user-status').value,
+                reset_usage: document.getElementById('user-reset').checked,
+                custom_limit_expire_at: document.getElementById('user-expire-at').value || null
+            };
+
+            const res = await apiFetch('/api/admin/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res) {
+                closeModal('user');
+                loadUsers();
+            }
+        }
+
+        async function deleteUserLimit(id) {
+            if (confirm('Are you sure you want to delete this custom user limit configuration? Deleting it will restore the default limit of the website for this user.')) {
+                const res = await apiFetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
+                if (res) {
+                    loadUsers();
+                }
+            }
+        }
+
+        async function killSession(token) {
+            if (confirm('Are you sure you want to terminate this user session? They will be logged out instantly.')) {
+                const res = await apiFetch(`/api/admin/sessions?token=${token}`, { method: 'DELETE' });
+                if (res) loadSessions();
+            }
+        }
+
+        async function saveWebsite(e) {
+            e.preventDefault();
+            const id = document.getElementById('web-id').value;
+            const payload = {
+                tool_id: parseInt(document.getElementById('web-tool').value),
+                name: document.getElementById('web-name').value,
+                domain: document.getElementById('web-domain').value,
+                secret_key: document.getElementById('web-secret').value,
+                session_duration: parseInt(document.getElementById('web-duration').value),
+                default_credit_limit: parseInt(document.getElementById('web-def-credits').value),
+                default_export_limit: parseInt(document.getElementById('web-def-exports').value)
+            };
+
+            let res;
+            if (id) {
+                payload.id = parseInt(id);
+                res = await apiFetch('/api/admin/websites', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                res = await apiFetch('/api/admin/websites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            }
+            if (res) {
+                closeModal('website');
+                loadWebsites();
+            }
+        }
+
+        function openAddToolModal() {
+            document.getElementById('tool-name').value = '';
+            document.getElementById('tool-category').value = '';
+            document.getElementById('tool-label1').value = '';
+            document.getElementById('tool-label2').value = '';
+            openModal('tool');
+        }
+
+        async function saveTool(e) {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('tool-name').value,
+                category: document.getElementById('tool-category').value,
+                limit_label_1: document.getElementById('tool-label1').value,
+                limit_label_2: document.getElementById('tool-label2').value
+            };
+
+            const res = await apiFetch('/api/admin/tools', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res) {
+                closeModal('tool');
+                const oldVal = document.getElementById('web-tool').value;
+                const tools = await apiFetch('/api/admin/tools');
+                if (tools) {
+                    State.tools = tools;
+                    const select = document.getElementById('web-tool');
+                    if (select) {
+                        select.innerHTML = tools.map(t => `<option value="${t.id}">${t.name} (${t.category.toUpperCase()})</option>`).join('');
+                        if (oldVal) {
+                            select.value = oldVal;
+                        } else {
+                            select.value = tools[tools.length - 1].id;
+                        }
+                    }
+                }
+            }
+        }
+
+        async function deleteWebsite(id) {
+            if (confirm('Warning: Deleting this website will remove all its reseller mappings, user accounts, sessions, and proxies. Proceed?')) {
+                const res = await apiFetch(`/api/admin/websites?id=${id}`, { method: 'DELETE' });
+                if (res) loadWebsites();
+            }
+        }
+
+        async function saveReseller(e) {
+            e.preventDefault();
+            const id = document.getElementById('reseller-id').value;
+            
+            // Collect checked website IDs
+            const websiteIDs = [];
+            document.querySelectorAll('#reseller-websites-checklist input[type="checkbox"]:checked').forEach(chk => {
+                websiteIDs.push(parseInt(chk.value));
+            });
+
+            const payload = {
+                username: document.getElementById('reseller-user').value,
+                password: document.getElementById('reseller-pass').value,
+                role: 'reseller',
+                websites: websiteIDs
+            };
+
+            let res;
+            if (id) {
+                payload.id = parseInt(id);
+                payload.status = document.getElementById('reseller-status').value;
+                res = await apiFetch('/api/admin/resellers', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                res = await apiFetch('/api/admin/resellers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            if (res) {
+                closeModal('reseller');
+                loadResellers();
+            }
+        }
+
+        async function deleteReseller(id) {
+            if (confirm('Are you sure you want to delete this reseller?')) {
+                const res = await apiFetch(`/api/admin/resellers?id=${id}`, { method: 'DELETE' });
+                if (res) loadResellers();
+            }
+        }
+
+        async function changePassword(e) {
+            e.preventDefault();
+            const pass = document.getElementById('prof-newpass').value;
+            const res = await apiFetch('/api/admin/profile/password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ new_password: pass })
+            });
+            if (res) {
+                alert('Password changed successfully!');
+                document.getElementById('prof-newpass').value = '';
+            }
+        }
+
+        // ── PROXY MANAGER FUNCTIONS ───────────────────────────────────────────────
+
+        async function loadProxies() {
+            const data = await apiFetch('/api/admin/proxies');
+            if (data) {
+                State.proxies = data;
+                renderProxies();
+            }
+        }
+
+        function renderProxies() {
+            const tbody = document.getElementById('proxies-tbody');
+            if (!tbody) return;
+            const list = State.proxies || [];
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:30px;">No proxies saved yet. Click "+ Add Proxy" to add one.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = list.map(p => `
+                <tr>
+                    <td><strong>${p.name}</strong></td>
+                    <td><span style="background:${p.proxy_type==='SOCKS5'?'#4f46e5':p.proxy_type==='HTTP'?'#0891b2':'#059669'};color:#fff;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">${p.proxy_type}</span></td>
+                    <td style="font-family:monospace;font-size:12px;word-break:break-all;">${p.endpoint}</td>
+                    <td><span style="background:${p.status==='active'?'#dcfce7':'#fee2e2'};color:${p.status==='active'?'#16a34a':'#dc2626'};padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600;">${p.status==='active'?'Active':'Inactive'}</span></td>
+                    <td style="display:flex;gap:6px;">
+                        <button class="btn-primary" style="padding:4px 10px;font-size:12px;" onclick="openEditProxy(${p.id})">Edit</button>
+                        <button class="btn-danger-outline" style="padding:4px 10px;font-size:12px;" onclick="deleteProxy(${p.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddProxy() {
+            document.getElementById('proxy-modal-title').innerText = 'Add New Proxy';
+            document.getElementById('proxy-id').value = '';
+            document.getElementById('proxy-name').value = '';
+            document.getElementById('proxy-type').value = 'SOCKS5';
+            document.getElementById('proxy-endpoint').value = '';
+            document.getElementById('proxy-status').value = 'active';
+            openModal('proxy');
+        }
+
+        function openEditProxy(id) {
+            const p = State.proxies.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('proxy-modal-title').innerText = 'Edit Proxy';
+            document.getElementById('proxy-id').value = p.id;
+            document.getElementById('proxy-name').value = p.name;
+            document.getElementById('proxy-type').value = p.proxy_type;
+            document.getElementById('proxy-endpoint').value = p.endpoint;
+            document.getElementById('proxy-status').value = p.status;
+            openModal('proxy');
+        }
+
+        async function saveProxy(e) {
+            e.preventDefault();
+            const id = document.getElementById('proxy-id').value;
+            const payload = {
+                name: document.getElementById('proxy-name').value,
+                proxy_type: document.getElementById('proxy-type').value,
+                endpoint: document.getElementById('proxy-endpoint').value,
+                status: document.getElementById('proxy-status').value
+            };
+            let res;
+            if (id) {
+                payload.id = parseInt(id);
+                res = await apiFetch('/api/admin/proxies', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            } else {
+                res = await apiFetch('/api/admin/proxies', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            }
+            if (res) { closeModal('proxy'); loadProxies(); }
+        }
+
+        async function deleteProxy(id) {
+            if (confirm('Delete this proxy? Accounts using it will keep the endpoint string but the saved proxy entry will be removed.')) {
+                const res = await apiFetch(`/api/admin/proxies?id=${id}`, { method: 'DELETE' });
+                if (res) loadProxies();
+            }
+        }
+
+        function onProxySelectChange() {
+            const sel = document.getElementById('acc-proxy-select');
+            const wrap = document.getElementById('acc-proxy-manual-wrap');
+            if (!sel || !wrap) return;
+            wrap.style.display = sel.value === '__manual__' ? 'block' : 'none';
+        }
+
+        // ── MODAL AND FIELD TOGGLERS ─────────────────────────────────────────────
+
+        function openModal(id) {
+            document.getElementById(`modal-${id}`).classList.add('active');
+        }
+        function closeModal(id) {
+            document.getElementById(`modal-${id}`).classList.remove('active');
+        }
+
+        // Populates the proxy selector dropdown with saved proxies
+        function populateProxySelector(currentProxyValue) {
+            const sel = document.getElementById('acc-proxy-select');
+            const manualWrap = document.getElementById('acc-proxy-manual-wrap');
+            if (!sel) return;
+            const proxies = State.proxies || [];
+            sel.innerHTML = '<option value="">— No Proxy (Direct) —</option>' +
+                proxies.filter(p => p.status === 'active').map(p =>
+                    `<option value="${p.endpoint}">${p.name} (${p.proxy_type})</option>`
+                ).join('') +
+                '<option value="__manual__">✏️ Enter Manually...</option>';
+            // Try to match saved proxy
+            const matched = proxies.find(p => p.endpoint === currentProxyValue);
+            if (currentProxyValue && matched) {
+                sel.value = currentProxyValue;
+                if (manualWrap) manualWrap.style.display = 'none';
+            } else if (currentProxyValue && !matched) {
+                sel.value = '__manual__';
+                if (manualWrap) {
+                    manualWrap.style.display = 'block';
+                    const mi = document.getElementById('acc-proxy-manual');
+                    if (mi) mi.value = currentProxyValue;
+                }
+            } else {
+                sel.value = '';
+                if (manualWrap) manualWrap.style.display = 'none';
+            }
+        }
+
+        function openAddAccount() {
+            document.getElementById('acc-title').innerText = 'Add Mapped Proxy Account';
+            document.getElementById('acc-id').value = '';
+            document.getElementById('acc-name').value = '';
+            document.getElementById('acc-cookie').value = '';
+            document.getElementById('acc-ua').value = State.accounts[0]?.user_agent || 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+            document.getElementById('acc-show-limit').checked = true;
+            document.getElementById('acc-status-group').style.display = 'none';
+            populateProxySelector('');
+            openModal('account');
+        }
+
+        // Edit Proxy details modal mapping
+        async function openEditAccount(id) {
+            await loadAccounts();
+            const a = State.accounts.find(x => x.id === id);
+            if (!a) return;
+
+            document.getElementById('acc-title').innerText = 'Edit Proxy Account';
+            document.getElementById('acc-id').value = a.id;
+            document.getElementById('acc-website').value = a.website_id;
+            document.getElementById('acc-name').value = a.name;
+            document.getElementById('acc-cookie').value = a.cookie;
+            document.getElementById('acc-ua').value = a.user_agent;
+            document.getElementById('acc-show-limit').checked = a.show_limit === true;
+            document.getElementById('acc-status').value = a.status;
+            document.getElementById('acc-status-group').style.display = 'flex';
+            populateProxySelector(a.proxy || '');
+            openModal('account');
+        }
+
+        function openAddUser() {
+            document.getElementById('user-id').value = '0';
+            document.getElementById('user-website-id').value = '0';
+            document.getElementById('user-title').innerText = 'Add User Manually';
+            
+            // Show username and website selector fields
+            document.getElementById('form-group-user-username').style.display = 'flex';
+            document.getElementById('form-group-user-website').style.display = 'flex';
+            document.getElementById('user-username').value = '';
+
+            const select = document.getElementById('user-website');
+            if (select) {
+                select.innerHTML = (State.websites || []).map(w => `<option value="${w.id}">${w.name} (${w.domain})</option>`).join('');
+            }
+            
+            document.getElementById('user-expire-at').value = '';
+            document.getElementById('user-status').value = 'active';
+            document.getElementById('user-reset').checked = false;
+            
+            onUserWebsiteChange();
+            openModal('user');
+        }
+
+        function onUserWebsiteChange() {
+            const select = document.getElementById('user-website');
+            if (!select) return;
+            const websiteID = parseInt(select.value);
+            const w = State.websites.find(x => x.id === websiteID);
+            if (!w) return;
+
+            if (w.limit_label_1) {
+                document.getElementById('form-group-limit1').style.display = 'flex';
+                document.getElementById('lbl-limit1').innerText = w.limit_label_1;
+                document.getElementById('user-limit1').value = w.default_credit_limit || '0';
+            } else {
+                document.getElementById('form-group-limit1').style.display = 'none';
+                document.getElementById('user-limit1').value = '0';
+            }
+
+            if (w.limit_label_2) {
+                document.getElementById('form-group-limit2').style.display = 'flex';
+                document.getElementById('lbl-limit2').innerText = w.limit_label_2;
+                document.getElementById('user-limit2').value = w.default_export_limit || '0';
+            } else {
+                document.getElementById('form-group-limit2').style.display = 'none';
+                document.getElementById('user-limit2').value = '0';
+            }
+        }
+
+        // Edit limits per categories
+        function openEditUser(id) {
+            const u = State.users.find(x => x.id === id);
+            if (!u) return;
+
+            document.getElementById('user-id').value = u.id;
+            document.getElementById('user-website-id').value = u.website_id;
+            document.getElementById('user-title').innerText = `Edit ${u.username} Quotas`;
+            
+            // Hide creation fields for editing
+            document.getElementById('form-group-user-username').style.display = 'none';
+            document.getElementById('form-group-user-website').style.display = 'none';
+
+            // Adjust limit forms dynamically depending on category!
+            if (u.limit_label_1) {
+                document.getElementById('form-group-limit1').style.display = 'flex';
+                document.getElementById('lbl-limit1').innerText = u.limit_label_1;
+                document.getElementById('user-limit1').value = u.credit_limit;
+            } else {
+                document.getElementById('form-group-limit1').style.display = 'none';
+                document.getElementById('user-limit1').value = '0';
+            }
+
+            if (u.limit_label_2) {
+                document.getElementById('form-group-limit2').style.display = 'flex';
+                document.getElementById('lbl-limit2').innerText = u.limit_label_2;
+                document.getElementById('user-limit2').value = u.export_limit;
+            } else {
+                document.getElementById('form-group-limit2').style.display = 'none';
+                document.getElementById('user-limit2').value = '0';
+            }
+
+            document.getElementById('user-expire-at').value = u.custom_limit_expire_at ? u.custom_limit_expire_at.split(' ')[0] : '';
+            document.getElementById('user-status').value = u.status;
+            document.getElementById('user-reset').checked = false;
+            openModal('user');
+        }
+
+        function openAddReseller() {
+            document.getElementById('reseller-title').innerText = 'Create Reseller Profile';
+            document.getElementById('reseller-id').value = '';
+            document.getElementById('reseller-user').value = '';
+            document.getElementById('reseller-pass').value = '';
+            document.getElementById('reseller-status-group').style.display = 'none';
+            document.querySelectorAll('#reseller-websites-checklist input[type="checkbox"]').forEach(c => c.checked = false);
+            openModal('reseller');
+        }
+
+        function openEditReseller(id) {
+            const r = State.resellers.find(x => x.id === id);
+            if (!r) return;
+
+            document.getElementById('reseller-title').innerText = 'Edit Reseller Config';
+            document.getElementById('reseller-id').value = r.id;
+            document.getElementById('reseller-user').value = r.username;
+            document.getElementById('reseller-pass').value = ''; // Blank password unless changing
+            document.getElementById('reseller-status').value = r.status;
+            document.getElementById('reseller-status-group').style.display = 'flex';
+
+            // Mark checkboxes of mapped websites
+            document.querySelectorAll('#reseller-websites-checklist input[type="checkbox"]').forEach(chk => {
+                chk.checked = r.websites && r.websites.includes(parseInt(chk.value));
+            });
+
+            openModal('reseller');
+        }
+
+        function openAddWebsite() {
+            document.getElementById('web-title').innerText = 'Add Mapped Website';
+            document.getElementById('web-id').value = '';
+            document.getElementById('web-tool').value = State.tools[0]?.id || '';
+            document.getElementById('web-name').value = '';
+            document.getElementById('web-domain').value = '';
+            document.getElementById('web-secret').value = '';
+            document.getElementById('web-duration').value = '30';
+            document.getElementById('web-def-credits').value = '50';
+            document.getElementById('web-def-exports').value = '100000';
+            
+            const submitBtn = document.querySelector('#form-website button[type="submit"]');
+            if (submitBtn) submitBtn.innerText = 'Create Domain';
+            openModal('website');
+        }
+
+        function openEditWebsite(id) {
+            const w = State.websites.find(x => x.id === id);
+            if (!w) return;
+
+            document.getElementById('web-title').innerText = 'Edit Mapped Website';
+            document.getElementById('web-id').value = w.id;
+            document.getElementById('web-tool').value = w.tool_id;
+            document.getElementById('web-name').value = w.name;
+            document.getElementById('web-domain').value = w.domain;
+            document.getElementById('web-secret').value = w.secret_key;
+            document.getElementById('web-duration').value = w.session_duration;
+            document.getElementById('web-def-credits').value = w.default_credit_limit;
+            document.getElementById('web-def-exports').value = w.default_export_limit;
+
+            const submitBtn = document.querySelector('#form-website button[type="submit"]');
+            if (submitBtn) submitBtn.innerText = 'Save Changes';
+            openModal('website');
+        }
+
+        // ── FRONTEND VIEWS & DRAW RENDERERS ──────────────────────────────────────
+
+        function renderApp() {
+            const root = document.getElementById('root');
+            
+            // A. Serve Login Screen if not authenticated
+            if (!State.authToken) {
+                root.innerHTML = `
+                    <div class="login-container">
+                        <div class="login-card">
+                            <h2 style="font-weight: 800; background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ToolsMandi</h2>
+                            <p>Sign in to your control panel</p>
+                            <form id="login-form">
+                                <div class="form-group">
+                                    <label>Username</label>
+                                    <input type="text" id="login-username" class="form-control" placeholder="Enter username" required autocomplete="username">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 24px;">
+                                    <label>Password</label>
+                                    <input type="password" id="login-password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+                                </div>
+                                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Login</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('login-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('login-username').value;
+                    const password = document.getElementById('login-password').value;
+
+                    const res = await fetch('/api/admin/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        State.authToken = 'active';
+                        State.user = data;
+                        localStorage.setItem('admin_token', 'active');
+                        localStorage.setItem('admin_user', JSON.stringify(data));
+                        renderApp();
+                    } else {
+                        const err = await res.json().catch(() => ({}));
+                        alert(err.message || 'Authentication failed');
+                    }
+                });
+                return;
+            }
+
+            // B. Serve Mapped Admin Dashboard Layout
+            const isMaster = State.user.role === 'master';
+
+            root.innerHTML = `
+                <header>
+                    <div class="logo-group">
+                        <span class="logo-icon">⚡</span>
+                        <span class="logo-title">ToolsMandi <span style="font-weight: 400; font-size: 13px; color: var(--text-muted);">Control Panel</span></span>
+                    </div>
+                    <div class="user-profile">
+                        <span class="user-badge">${State.user.username} (${State.user.role})</span>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    </div>
+                </header>
+
+                <div class="wrapper">
+                    <!-- Left Sidebar (Desktop) -->
+                    <aside class="sidebar">
+                        <div class="nav-item active" data-tab="dashboard" onclick="navigate('dashboard')">📊 Dashboard</div>
+                        <div class="nav-item" data-tab="accounts" onclick="navigate('accounts')">🔑 Mapped Accounts</div>
+                        <div class="nav-item" data-tab="automate" onclick="navigate('automate')">🤖 Automate Tasks</div>
+                        <div class="nav-item" data-tab="users" onclick="navigate('users')">👥 User Limits</div>
+                        <div class="nav-item" data-tab="sessions" onclick="navigate('sessions')">🌐 Active Logins</div>
+                        <div class="nav-item" data-tab="usage" onclick="navigate('usage')">📊 Quota Logs</div>
+                        <div class="nav-item" data-tab="analytics" onclick="navigate('analytics')">📈 Analytics</div>
+                        <div class="nav-item" data-tab="products" onclick="navigate('products')">📦 Product ID Mapping</div>
+                        <div class="nav-item" data-tab="violations" onclick="navigate('violations')">🚫 Violations Logs</div>
+                        ${isMaster ? `
+                            <div class="nav-item" data-tab="proxies" onclick="navigate('proxies')">🛡️ Proxy Manager</div>
+                            <div class="nav-item" data-tab="websites" onclick="navigate('websites')">🌐 Website Domains</div>
+                            <div class="nav-item" data-tab="resellers" onclick="navigate('resellers')">🤝 Resellers</div>
+                        ` : ''}
+                        <div class="nav-item" data-tab="profile" onclick="navigate('profile')">⚙️ Change Password</div>
+                    </aside>
+
+                    <!-- Main Application Pages Container -->
+                    <main>
+                        <!-- 1. OVERVIEW PAGE -->
+                        <div id="page-dashboard" class="page active">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>Overview</h1>
+                                    <p>Real-time analytics and statistics</p>
+                                </div>
+                            </div>
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <span class="metric-label">Active User Logins</span>
+                                    <span class="metric-value" id="stat-sessions">0</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-label">Mapped Cookies / Accounts</span>
+                                    <span class="metric-value" id="stat-accounts">0</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-label">Daily Credit Hits (Today)</span>
+                                    <span class="metric-value" id="stat-credits">0</span>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Live Server Status</span>
+                                    <span class="badge badge-success">Online & Listening</span>
+                                </div>
+                                <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
+                                    All proxies and limits are synchronized. User session terminations are processed instantaneously.
+                                </p>
+                                
+                                <div style="margin-top: 18px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                                    <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--text-main);">🌐 Active User Sessions</h3>
+                                    <div class="table-responsive">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Website</th>
+                                                    <th>Username</th>
+                                                    <th>Client IP</th>
+                                                    <th>Mapped Account</th>
+                                                    <th>Expiry Time (IST)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="dashboard-active-users-tbody">
+                                                <tr>
+                                                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 12px;">No active user sessions.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. PROXIES ACCOUNTS PAGE -->
+                        <div id="page-accounts" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>Mapped Proxies & Accounts</h1>
+                                    <p>Manage browser cookies, user-agents, and proxies</p>
+                                </div>
+                                <button class="btn-primary" onclick="openAddAccount()">+ Add Account</button>
+                            </div>
+                            <div class="filter-bar">
+                                <input type="text" id="acc-search" class="form-control" placeholder="🔍 Search by account name..." oninput="filterAccounts()" style="max-width:220px;">
+                                <select id="acc-tool-filter" class="form-control" onchange="filterAccounts()" style="max-width:200px;">
+                                    <option value="">All Websites</option>
+                                </select>
+                                <select id="acc-reseller-filter" class="form-control" onchange="filterAccounts()" style="max-width:180px;">
+                                    <option value="">All Resellers</option>
+                                </select>
+                            </div>
+                            <div id="accounts-cards-grid" class="cards-grid"></div>
+                        </div>
+
+                        <!-- 2b. AUTOMATE TASKS PAGE -->
+                        <div id="page-automate" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>Automate Tasks</h1>
+                                    <p>Har account ke liye alag GoAuto trigger URL, Task UID aur cookie ingest key set karein</p>
+                                </div>
+                            </div>
+                            <div class="filter-bar">
+                                <input type="text" id="auto-search" class="form-control" placeholder="🔍 Search account, website, UID, ingest key..." oninput="filterAutomateTasks()" style="max-width:280px;">
+                                <select id="auto-tool-filter" class="form-control" onchange="filterAutomateTasks()" style="max-width:200px;">
+                                    <option value="">All Websites</option>
+                                </select>
+                                <select id="auto-status-filter" class="form-control" onchange="filterAutomateTasks()" style="max-width:180px;">
+                                    <option value="">All Status</option>
+                                    <option value="configured">Automation Set</option>
+                                    <option value="not_configured">Not Configured</option>
+                                </select>
+                            </div>
+                            <div id="automate-tasks-list"></div>
+                        </div>
+
+                        <!-- 3. USERS LIMIT PAGE -->
+                        <div id="page-users" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>User Limit Allocator</h1>
+                                    <p>Customize specific daily and export limits for tool users</p>
+                                </div>
+                                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                    <input type="text" id="users-search" class="form-control" placeholder="🔍 Search Username..." oninput="filterUsers()" style="max-width:200px;margin-bottom:0;">
+                                    <select id="users-tool-filter" class="form-control" onchange="filterUsers()" style="max-width:200px;margin-bottom:0;">
+                                        <option value="">All Websites</option>
+                                    </select>
+                                    <div class="tab-switcher">
+                                        <button class="tab-btn active" id="users-tab-all" onclick="setUsersTab('all')">All Users</button>
+                                        <button class="tab-btn" id="users-tab-custom" onclick="setUsersTab('custom')">Custom Only</button>
+                                    </div>
+                                    <button class="btn-primary" onclick="openAddUser()">+ Add User</button>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Website</th>
+                                                <th>Username</th>
+                                                <th>Credits Used</th>
+                                                <th>Export Limit</th>
+                                                <th>Expire Date</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="users-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. ACTIVE SESSIONS PAGE -->
+                        <div id="page-sessions" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>Active Logins</h1>
+                                    <p>Currently logged-in browsers and active device sessions</p>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Website Name</th>
+                                                <th>Username</th>
+                                                <th>Client IP</th>
+                                                <th>Assigned Proxy Account</th>
+                                                <th>Expires At (IST)</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="sessions-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4.5 QUOTA USAGE LOGS PAGE -->
+                        <div id="page-usage" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>Quota Usage Logs</h1>
+                                    <p>Real-time historical logs of daily credits and CSV export rows used by users</p>
+                                </div>
+                                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                    <input type="text" id="usage-search" class="form-control" placeholder="🔍 Search Username..." oninput="loadUsage()" style="max-width:200px;margin-bottom:0;">
+                                    <select id="usage-tool-filter" class="form-control" onchange="loadUsage()" style="max-width:200px;margin-bottom:0;">
+                                        <option value="">All Websites</option>
+                                    </select>
+                                    <button class="btn-primary" onclick="loadUsage()">Search</button>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Website Name</th>
+                                                <th>Username</th>
+                                                <th>Daily Credits Used / Limit</th>
+                                                <th>Weekly Export Rows Used / Limit</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="usage-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. WEBSITES PAGE (Master Only) -->
+                        <div id="page-websites" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>Website Domains</h1>
+                                    <p>Register domains and handshake secret keys</p>
+                                </div>
+                                <button class="btn-primary" onclick="openAddWebsite()">+ Add Website</button>
+                            </div>
+                            <div class="filter-bar">
+                                <input type="text" id="websites-search" class="form-control" placeholder="🔍 Search by domain or name..." oninput="filterWebsites()" style="max-width:300px;">
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Mapped Tool</th>
+                                                <th>Website Name</th>
+                                                <th>Domain</th>
+                                                <th>Handshake Key</th>
+                                                <th>Session Expiry</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="websites-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. RESELLERS PAGE (Master Only) -->
+                        <div id="page-resellers" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>Reseller Accounts</h1>
+                                    <p>Manage reseller profiles and assign website domains</p>
+                                </div>
+                                <button class="btn-primary" onclick="openAddReseller()">+ Create Reseller</button>
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Reseller ID</th>
+                                                <th>Username</th>
+                                                <th>Role</th>
+                                                <th>Status</th>
+                                                <th>Assigned Websites</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="resellers-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. CHANGE PASSWORD PAGE -->
+                        <!-- ANALYTICS PAGE -->
+                        <div id="page-analytics" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>Analytics</h1>
+                                    <p>Login history and account switch activity logs</p>
+                                </div>
+                            </div>
+
+                            <!-- Filter Bar -->
+                            <div class="card" style="margin-bottom:18px;padding:16px 20px;">
+                                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                                    <select id="analytics-website-filter" class="form-control" style="max-width:240px;" onchange="loadAnalytics()">
+                                        <option value="">All Websites</option>
+                                    </select>
+                                    <input type="text" id="analytics-search" class="form-control" placeholder="Search by username or IP..." style="max-width:280px;" oninput="loadAnalyticsLogins()">
+                                    <div style="display:flex;gap:8px;margin-left:auto;">
+                                        <button class="btn-primary" id="analytics-tab-logins" onclick="switchAnalyticsTab('logins')" style="padding:8px 18px;font-size:13px;">Login History</button>
+                                        <button class="btn-secondary" id="analytics-tab-switches" onclick="switchAnalyticsTab('switches')" style="padding:8px 18px;font-size:13px;">Switch History</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Login History Table -->
+                            <div id="analytics-logins-section">
+                                <div class="card">
+                                    <h2 class="card-title" style="margin-bottom:16px;">🔐 Login History <span id="analytics-logins-count" style="font-size:13px;font-weight:400;color:#888;"></span></h2>
+                                    <div style="overflow-x:auto;">
+                                        <table class="data-table">
+                                            <thead><tr>
+                                                <th>Username</th>
+                                                <th>IP Address</th>
+                                                <th>Device / Browser</th>
+                                                <th>Website</th>
+                                                <th>Login Time (IST)</th>
+                                            </tr></thead>
+                                            <tbody id="analytics-logins-body">
+                                                <tr><td colspan="5" style="text-align:center;color:#aaa;padding:24px;">Loading...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div id="analytics-logins-pagination" style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;align-items:center;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Switch History Table -->
+                            <div id="analytics-switches-section" style="display:none;">
+                                <div class="card">
+                                    <h2 class="card-title" style="margin-bottom:16px;">🔄 Account Switch History <span id="analytics-switches-count" style="font-size:13px;font-weight:400;color:#888;"></span></h2>
+                                    <div style="overflow-x:auto;">
+                                        <table class="data-table">
+                                            <thead><tr>
+                                                <th>Username</th>
+                                                <th>From Account</th>
+                                                <th>→ To Account</th>
+                                                <th>Reason</th>
+                                                <th>Website</th>
+                                                <th>Switched At (IST)</th>
+                                            </tr></thead>
+                                            <tbody id="analytics-switches-body">
+                                                <tr><td colspan="6" style="text-align:center;color:#aaa;padding:24px;">Loading...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div id="analytics-switches-pagination" style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;align-items:center;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Allowed Products (aMember Product IDs Mapping) PAGE -->
+                        <div id="page-products" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>📦 Product ID Mapping</h1>
+                                    <p>Manage allowed aMember Product IDs authorized for proxy access</p>
+                                </div>
+                                <button class="btn-primary" onclick="openAddProduct()">+ Add Product ID</button>
+                            </div>
+                            <div class="filter-bar">
+                                <input type="text" id="products-search" class="form-control" placeholder="🔍 Search products..." oninput="filterProducts()" style="max-width:280px;">
+                                <select id="products-website-filter" class="form-control" onchange="filterProducts()" style="max-width:220px;">
+                                    <option value="">All Websites</option>
+                                </select>
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Website / Domain</th>
+                                                <th>Product ID (aMember)</th>
+                                                <th>Product Name (Description)</th>
+                                                <th>Created At</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="products-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Violations Logs PAGE -->
+                        <div id="page-violations" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>🚫 Blocked URL Logs (Violations)</h1>
+                                    <p>Real-time historical logs of users attempting to access restricted Ahrefs pages</p>
+                                </div>
+                                <button class="btn-primary" onclick="loadViolations()">🔄 Refresh</button>
+                            </div>
+                            <div class="filter-bar">
+                                <input type="text" id="violations-search" class="form-control" placeholder="🔍 Search by username or IP..." oninput="filterViolations()" style="max-width:250px;">
+                                <select id="violations-tool-filter" class="form-control" onchange="filterViolations()" style="max-width:200px;">
+                                    <option value="">All Websites</option>
+                                </select>
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Website Name</th>
+                                                <th>Username</th>
+                                                <th>Client IP</th>
+                                                <th>Attempted Path</th>
+                                                <th>Timestamp (IST)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="violations-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="page-profile" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>Change Password</h1>
+                                    <p>Update your control panel password securely</p>
+                                </div>
+                            </div>
+                            <div class="card" style="max-width: 500px;">
+                                <form id="form-password" onsubmit="changePassword(event)">
+                                    <div class="form-group" style="margin-bottom: 20px;">
+                                        <label>New Password</label>
+                                        <input type="password" id="prof-newpass" class="form-control" placeholder="Enter new strong password" required autocomplete="new-password">
+                                    </div>
+                                    <button type="submit" class="btn-primary">Update Password</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- PROXIES PAGE -->
+                        <div id="page-proxies" class="page">
+                            <div class="page-header">
+                                <div class="page-title">
+                                    <h1>🛡️ Proxy Manager</h1>
+                                    <p>Manage saved proxies — select them in account configs</p>
+                                </div>
+                                <button class="btn-primary" onclick="openAddProxy()">+ Add Proxy</button>
+                            </div>
+                            <div class="card">
+                                <div class="table-responsive">
+                                    <table>
+                                        <thead><tr>
+                                            <th>Proxy Name</th>
+                                            <th>Type</th>
+                                            <th>Endpoint / Connection String</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr></thead>
+                                        <tbody id="proxies-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </main>
+
+                    <!-- Bottom Nav Mobile Bar -->
+                    <nav class="bottom-nav">
+                        <a class="bnav-item active" data-tab="dashboard" onclick="navigate('dashboard')">
+                            <span class="bnav-icon">📊</span>
+                            <span>Dashboard</span>
+                        </a>
+                        <a class="bnav-item" data-tab="accounts" onclick="navigate('accounts')">
+                            <span class="bnav-icon">🔑</span>
+                            <span>Proxies</span>
+                        </a>
+                        <a class="bnav-item" data-tab="users" onclick="navigate('users')">
+                            <span class="bnav-icon">👥</span>
+                            <span>Limits</span>
+                        </a>
+                        <a class="bnav-item" data-tab="sessions" onclick="navigate('sessions')">
+                            <span class="bnav-icon">🌐</span>
+                            <span>Active</span>
+                        </a>
+                        <a class="bnav-item" data-tab="usage" onclick="navigate('usage')">
+                            <span class="bnav-icon">📊</span>
+                            <span>Logs</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- ── MODAL DIALOGS (DRAWERS) ── -->
+
+                <!-- 1. Account Dialog -->
+                <div class="modal" id="modal-account">
+                    <div class="modal-content">
+                        <h2 class="card-title" id="acc-title" style="margin-bottom: 20px;">Add Mapped Proxy Account</h2>
+                        <form id="form-account" onsubmit="saveAccount(event)">
+                            <input type="hidden" id="acc-id">
+                            <div class="form-group">
+                                <label>Target Website Domain</label>
+                                <select id="acc-website" class="form-control" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Account Label / Name</label>
+                                <input type="text" id="acc-name" class="form-control" placeholder="e.g. Ahrefs Cookie 1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Ahrefs Cookies (JSON Array or Netscape raw format)</label>
+                                <textarea id="acc-cookie" class="form-control" style="height: 100px; font-family: monospace; font-size: 12px;" placeholder="Paste JSON cookies..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Custom Browser User-Agent</label>
+                                <input type="text" id="acc-ua" class="form-control" placeholder="Mozilla/5.0..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>Account Proxy Connection (SOCKS5/HTTP — Optional)</label>
+                                <select id="acc-proxy-select" class="form-control" onchange="onProxySelectChange()">
+                                    <option value="">— No Proxy (Direct) —</option>
+                                    <option value="__manual__">✏️ Enter Manually...</option>
+                                </select>
+                                <div id="acc-proxy-manual-wrap" style="margin-top:8px;display:none;">
+                                    <input type="text" id="acc-proxy-manual" class="form-control" placeholder="socks5://username:password@ip:port or host:port:user:pass">
+                                    <small style="color:#64748b;font-size:11px;margin-top:4px;display:block;">Format: socks5://user:pass@host:port &nbsp;|&nbsp; http://user:pass@host:port &nbsp;|&nbsp; host:port:user:pass</small>
+                                </div>
+                            </div>
+                            <div class="form-group" id="acc-status-group">
+                                <label>Account Status</label>
+                                <select id="acc-status" class="form-control">
+                                    <option value="active">Active (Online)</option>
+                                    <option value="logged_out">Logged Out</option>
+                                    <option value="blocked">Blocked / CF Mitigated</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex-direction: row; gap: 10px; align-items: center; margin-bottom: 20px;">
+                                <input type="checkbox" id="acc-show-limit" style="width: 16px; height: 16px; cursor: pointer;" checked>
+                                <label for="acc-show-limit" style="cursor: pointer; font-weight: 500;">Show Limits widget to users assigned to this account</label>
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                                <button type="button" class="btn-danger-outline" onclick="closeModal('account')">Cancel</button>
+                                <button type="submit" class="btn-primary">Save Config</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 1b. Automation Config Dialog -->
+                <div class="modal" id="modal-automation">
+                    <div class="modal-content">
+                        <h2 class="card-title" id="auto-title" style="margin-bottom: 8px;">Automation Config</h2>
+                        <p id="auto-account-label" style="font-size:13px;color:var(--text-muted);margin-bottom:20px;"></p>
+                        <form id="form-automation" onsubmit="saveAutomation(event)">
+                            <input type="hidden" id="auto-id">
+                            <input type="hidden" id="auto-website-id">
+                            <div class="form-group">
+                                <label>GoAuto Trigger API URL (base — per account / server)</label>
+                                <input type="url" id="auto-api-url" class="form-control" placeholder="https://dashboard.seotoolscart.com/api/tasks/run" oninput="updateAutomationPreviews()">
+                                <small style="color:#64748b;font-size:11px;margin-top:4px;display:block;">Har server ka alag base URL ho sakta hai. Logout par is URL par trigger hoga.</small>
+                            </div>
+                            <div class="form-group">
+                                <label>GoAuto Automation Task UID</label>
+                                <input type="text" id="auto-goauto-task" class="form-control" placeholder="e.g. owscredauto_runZikanalytics" oninput="updateAutomationPreviews()">
+                                <small style="color:#64748b;font-size:11px;margin-top:4px;display:block;">Logout par GoAuto ko call karne ke liye task UID — body me pass hoga.</small>
+                            </div>
+                            <div id="auto-trigger-preview" class="automation-preview-box" style="margin-bottom:16px;"></div>
+                            <div class="form-group">
+                                <label>Automation Ingest Key (unique)</label>
+                                <input type="text" id="auto-ingest-key" class="form-control" placeholder="e.g. runzikanalytics" maxlength="64" oninput="updateAutomationPreviews()">
+                                <small style="color:#64748b;font-size:11px;margin-top:4px;display:block;">Automation is key se account dhundh kar cookie update karega.</small>
+                            </div>
+                            <div id="auto-ingest-preview" class="automation-preview-box" style="margin-bottom:16px;"></div>
+                            <div id="auto-token-preview" class="automation-preview-box" style="margin-bottom:16px;background:#fff7ed;border-color:#fdba74;"></div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                                <button type="button" class="btn-danger-outline" onclick="closeModal('automation')">Cancel</button>
+                                <button type="submit" class="btn-primary">Save Automation</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 2. User Limit Dialog -->
+                <div class="modal" id="modal-user">
+                    <div class="modal-content">
+                        <h2 class="card-title" id="user-title" style="margin-bottom: 20px;">Edit User Limits</h2>
+                        <form id="form-user" onsubmit="saveUser(event)">
+                            <input type="hidden" id="user-id">
+                            <input type="hidden" id="user-website-id">
+                            <div class="form-group" id="form-group-user-username" style="display: none;">
+                                <label>User Account Username</label>
+                                <input type="text" id="user-username" class="form-control" placeholder="e.g. Sagar">
+                            </div>
+                            <div class="form-group" id="form-group-user-website" style="display: none;">
+                                <label>Target Website Domain</label>
+                                <select id="user-website" class="form-control" onchange="onUserWebsiteChange()"></select>
+                            </div>
+                            <div class="form-group" id="form-group-limit1">
+                                <label id="lbl-limit1">Daily Limit</label>
+                                <input type="number" id="user-limit1" class="form-control" required>
+                            </div>
+                            <div class="form-group" id="form-group-limit2">
+                                <label id="lbl-limit2">Secondary Limit</label>
+                                <input type="number" id="user-limit2" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Custom Limit Expire Date (Optional)</label>
+                                <input type="date" id="user-expire-at" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Access Status</label>
+                                <select id="user-status" class="form-control" required>
+                                    <option value="active">Active Plan</option>
+                                    <option value="suspended">Suspended</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex-direction: row; gap: 10px; align-items: center;">
+                                <input type="checkbox" id="user-reset" style="width: 16px; height: 16px; cursor: pointer;">
+                                <label for="user-reset" style="cursor: pointer;">Reset usage logs today (Credits Refresh)</label>
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                                <button type="button" class="btn-danger-outline" onclick="closeModal('user')">Cancel</button>
+                                <button type="submit" class="btn-primary">Update Limits</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 3. Website Master Dialog -->
+                <div class="modal" id="modal-website">
+                    <div class="modal-content">
+                        <h2 class="card-title" id="web-title" style="margin-bottom: 20px;">Add Mapped Website</h2>
+                        <form id="form-website" onsubmit="saveWebsite(event)">
+                            <input type="hidden" id="web-id">
+                            <div class="form-group">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <label style="margin-bottom: 0;">Associated Master Tool</label>
+                                    <a href="javascript:void(0)" onclick="openAddToolModal()" style="font-size: 13px; font-weight: 600; color: #4f46e5; text-decoration: none;">+ Create New Tool</a>
+                                </div>
+                                <select id="web-tool" class="form-control" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Website Name</label>
+                                <input type="text" id="web-name" class="form-control" placeholder="e.g. ToolsMandi Ahrefs Premium" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Website Domain (Exactly mapped hostname)</label>
+                                <input type="text" id="web-domain" class="form-control" placeholder="e.g. ct.toolsmandi.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Handshake secret_key (Shared signature secret)</label>
+                                <input type="text" id="web-secret" class="form-control" placeholder="e.g. toolsmandi_secret_key" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Session Duration (Minutes)</label>
+                                <input type="number" id="web-duration" class="form-control" value="30" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Default Credits Limit (Daily Quota)</label>
+                                <input type="number" id="web-def-credits" class="form-control" value="50" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Default Export Rows Limit</label>
+                                <input type="number" id="web-def-exports" class="form-control" value="100000" required>
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                                <button type="button" class="btn-danger-outline" onclick="closeModal('website')">Cancel</button>
+                                <button type="submit" class="btn-primary">Create Domain</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 3.5. Associated Master Tool Dialog -->
+                <div class="modal" id="modal-tool" style="z-index: 1100;">
+                    <div class="modal-content" style="max-width: 450px;">
+                        <h2 class="card-title" style="margin-bottom: 20px;">Create Associated Master Tool</h2>
+                        <form id="form-tool" onsubmit="saveTool(event)">
+                            <div class="form-group">
+                                <label>Tool Name</label>
+                                <input type="text" id="tool-name" class="form-control" placeholder="e.g. Skillshare" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <input type="text" id="tool-category" class="form-control" placeholder="e.g. LEARNING, AI, DESIGN" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Daily Credit Limit Label (Primary - Optional)</label>
+                                <input type="text" id="tool-label1" class="form-control" placeholder="e.g. Daily Credits, Watch Hours (leave blank if none)">
+                            </div>
+                            <div class="form-group">
+                                <label>Export Limit Label (Secondary - Optional)</label>
+                                <input type="text" id="tool-label2" class="form-control" placeholder="e.g. Export Rows, Optional Limit (leave blank if none)">
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                                <button type="button" class="btn-danger-outline" onclick="closeModal('tool')">Cancel</button>
+                                <button type="submit" class="btn-primary">Create Tool</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 4. Reseller Dialog -->
+                <div class="modal" id="modal-reseller">
+                    <div class="modal-content">
+                        <h2 class="card-title" id="reseller-title" style="margin-bottom: 20px;">Add Reseller Account</h2>
+                        <form id="form-reseller" onsubmit="saveReseller(event)">
+                            <input type="hidden" id="reseller-id">
+                            <div class="form-group">
+                                <label>Reseller Username</label>
+                                <input type="text" id="reseller-user" class="form-control" placeholder="Enter username" required>
+                            </div>
+                            <div class="form-group" id="reseller-pass-group">
+                                <label>Password</label>
+                                <input type="password" id="reseller-pass" class="form-control" placeholder="Enter password" required autocomplete="new-password">
+                            </div>
+                            <div class="form-group">
+                                <label>Assign Managed Websites (Scope Access check list)</label>
+                                <div class="checkbox-list" id="reseller-websites-checklist"></div>
+                            </div>
+                            <div class="form-group" id="reseller-status-group">
+                                <label>Account Status</label>
+                                <select id="reseller-status" class="form-control">
+                                    <option value="active">Active</option>
+                                    <option value="suspended">Suspended</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                                <button type="button" class="btn-danger-outline" onclick="closeModal('reseller')">Cancel</button>
+                                <button type="submit" class="btn-primary">Save Reseller</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 4.5. Proxy Manager Dialog -->
+                <div class="modal" id="modal-proxy" style="z-index: 1100;">
+                    <div class="modal-content" style="max-width: 500px;">
+                        <h2 class="card-title" id="proxy-modal-title" style="margin-bottom: 20px;">Add New Proxy</h2>
+                        <form id="form-proxy" onsubmit="saveProxy(event)">
+                            <input type="hidden" id="proxy-id">
+                            <div class="form-group">
+                                <label>Proxy Name / Label</label>
+                                <input type="text" id="proxy-name" class="form-control" placeholder="e.g. US Datacenter SOCKS5 #1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Proxy Type</label>
+                                <select id="proxy-type" class="form-control">
+                                    <option value="SOCKS5">SOCKS5</option>
+                                    <option value="HTTP">HTTP</option>
+                                    <option value="HTTPS">HTTPS</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Proxy Endpoint / Connection String</label>
+                                <input type="text" id="proxy-endpoint" class="form-control" placeholder="socks5://user:pass@ip:port or host:port:user:pass" required>
+                                <small style="color:#64748b;font-size:11px;margin-top:4px;display:block;">Format examples: <code>socks5://user:pass@1.2.3.4:1080</code> &nbsp;|&nbsp; <code>http://user:pass@host:8080</code> &nbsp;|&nbsp; <code>216.224.127.122:12324:user:pass</code></small>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="proxy-status" class="form-control">
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                                <button type="button" class="btn-danger-outline" onclick="closeModal('proxy')">Cancel</button>
+                                <button type="submit" class="btn-primary">Save Proxy</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 5. Product Mapping Dialog -->
+                <div class="modal" id="modal-product">
+                    <div class="modal-content">
+                        <h2 class="card-title" id="prod-title" style="margin-bottom: 20px;">Add Allowed Product ID</h2>
+                        <form id="form-product" onsubmit="saveProduct(event)">
+                            <input type="hidden" id="prod-id">
+                            <div class="form-group">
+                                <label>Associated Website / Domain</label>
+                                <select id="prod-website" class="form-control" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label>aMember Product ID(s) (Single integer, or comma-separated list)</label>
+                                <input type="text" id="prod-product-id" class="form-control" placeholder="e.g. 5 or 1,2,3,22,29" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Product Name / Description</label>
+                                <input type="text" id="prod-name" class="form-control" placeholder="e.g. Ahrefs Lite Weekly" required>
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                                <button type="button" class="btn-danger-outline" onclick="closeModal('product')">Cancel</button>
+                                <button type="submit" class="btn-primary" id="prod-submit">Save Product</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 6. Detailed Quota Logs Modal -->
+                <div class="modal" id="modal-usage-details">
+                    <div class="modal-content" style="max-width: 850px; width: 90%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                            <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 0;" id="usage-details-title">User Detailed Usage Logs</h2>
+                            <button type="button" onclick="closeModal('usage-details')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); line-height: 1;">&times;</button>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px;">
+                            <input type="text" id="usage-details-search" class="form-control" placeholder="Search Endpoint..." style="width: 250px; margin-bottom: 0;">
+                            <button type="button" class="btn-primary" id="usage-details-search-btn">Search</button>
+                        </div>
+                        <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Log Type</th>
+                                        <th>Usage Hits / Rows</th>
+                                        <th>Target Path</th>
+                                        <th>Timestamp (IST)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usage-details-tbody">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 12px;">No records found.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Setup Navigation trigger
+            if (State.authToken) {
+                loadAutomationDefaults().then(() => navigate(State.activeTab));
+            } else {
+                navigate(State.activeTab);
+            }
+        }
+
+        // Render application at start
+        renderApp();
+    </script>
+</body>
+</html>

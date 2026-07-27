@@ -1,0 +1,18 @@
+[Unit]
+Description=Claude Admin Panel (cldup.1clkaccess.store)
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/www/wwwroot/1clkaccess.store/cldup
+ExecStart=/www/wwwroot/1clkaccess.store/cldup/ahrefs-admin
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=claude-cldup
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

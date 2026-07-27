@@ -1,0 +1,117 @@
+{
+  "port": "8802",
+  "use_database": true,
+  "bypass_auth": false,
+  "target_url": "https://claude.ai",
+  "cookie_path": "cookie.txt",
+  "public_host": "cld.1clkaccess.store",
+  "public_scheme": "https",
+  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  "logout_detect_text": "Sign in",
+  "automation_url": "",
+  "automation_payload": {},
+  "automation_headers": {},
+  "logo_text": "ToolsMandi.com",
+  "cooldown_file_path": "/www/wwwroot/1clkaccess.store/cld/cooldown.txt",
+  "cooldown_seconds": 180,
+  "tool_name": "Claude AI",
+  "logout_detect_texts": [
+    "Sign in",
+    "Log in",
+    "Continue with Google",
+    "claude.ai/login"
+  ],
+  "watchdog_triggers": [
+    "Sign in",
+    "Log in",
+    "claude.ai/login"
+  ],
+  "login_redirect_keywords": [
+    "accounts.google.com",
+    "signin",
+    "sign-in",
+    "/login"
+  ],
+  "extra_rewrite_domains": [
+    "claude.ai"
+  ],
+  "domain_path_map": {},
+  "refresh_loop_seconds": 5,
+  "inject_export_tool": false,
+  "home_path": "/new",
+  "blocked_paths": [],
+  "blocked_suffixes": [],
+  "sensitive_cookies": [
+    "sessionKey",
+    "__cf_bm",
+    "anthropic-device-id"
+  ],
+  "custom_css": "",
+  "custom_js": "",
+  "screen_error_redirect": {
+    "enabled": true,
+    "detect_text": "Unable to connect to the website",
+    "redirect_path": "/new",
+    "check_interval_ms": 1000,
+    "max_retries": 8,
+    "debug": false
+  },
+  "local_test_mode": false,
+  "debug_log": false,
+  "mysql_host": "127.0.0.1",
+  "mysql_port": "3306",
+  "mysql_user": "claude_1clk",
+  "mysql_password": "CHANGE_ME",
+  "mysql_db": "claude_1clk",
+  "secret_key": "toolsmandi_claude_secret_xyz123",
+  "session_duration_minutes": 30,
+  "member_area_url": "https://toolsmandi.com/",
+  "replacements": [],
+  "session_security": {
+    "enabled": true,
+    "single_session_per_user": true,
+    "ip_protection": {
+      "enabled": true,
+      "mode": "soft",
+      "grace_changes_per_30min": 5,
+      "concurrent_kill_enabled": false,
+      "concurrent_window_seconds": 300
+    },
+    "device_cookie": {
+      "enabled": true,
+      "cookie_name": "tm_device"
+    },
+    "domain_check": {
+      "enabled": true,
+      "expected_host": "cld.1clkaccess.store",
+      "delay_seconds": 2,
+      "immediate_check": true,
+      "recheck_interval_seconds": 60,
+      "action": "logout"
+    },
+    "account_cookie_protection": {
+      "enabled": true,
+      "concurrent_kill_enabled": false,
+      "concurrent_window_seconds": 300
+    },
+    "security_heartbeat": {
+      "enabled": true,
+      "interval_seconds": 90
+    },
+    "headers": {
+      "x_frame_options": "DENY",
+      "csp_frame_ancestors": "'none'",
+      "cors_allow_origin": "https://cld.1clkaccess.store"
+    },
+    "ott_ip_validation": {
+      "enabled": false,
+      "mode": "soft"
+    },
+    "datacenter_score": {
+      "enabled": false
+    },
+    "cloudflare": {
+      "enabled": false
+    }
+  }
+}

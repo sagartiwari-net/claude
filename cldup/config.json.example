@@ -1,0 +1,11 @@
+{
+  "port": "7844",
+  "mysql_host": "127.0.0.1",
+  "mysql_port": "3306",
+  "mysql_user": "claude_1clk",
+  "mysql_password": "CHANGE_ME",
+  "mysql_db": "claude_1clk",
+  "secret_key": "toolsmandi_claude_secret_xyz123",
+  "default_automation_api_url": "",
+  "panel_public_url": "https://cldup.1clkaccess.store"
+}

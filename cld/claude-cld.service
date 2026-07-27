@@ -1,0 +1,18 @@
+[Unit]
+Description=Claude AI Proxy (cld.1clkaccess.store)
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/www/wwwroot/1clkaccess.store/cld
+ExecStart=/www/wwwroot/1clkaccess.store/cld/claude-ai-go-proxy
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=claude-cld
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

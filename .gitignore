@@ -1,0 +1,27 @@
+# Binaries & local runtime
+claude-ai-go-proxy
+claude-ai-go-proxy-linux
+ahrefs-admin
+ahrefs-admin-linux
+ahrefs-admin-mac
+*.exe
+cookie.txt
+cooldown.txt
+config.json
+
+# Secrets / dumps (reference only — do not push)
+toolsmandirefct.sql
+*.sql.gz
+
+# Keep examples
+!**/config.json.example
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Build cache
+cld/claude-ai-go-proxy
+cldup/ahrefs-admin
