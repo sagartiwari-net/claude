@@ -434,88 +434,92 @@ func renderAccessDeniedPage(w http.ResponseWriter, cfg Config) {
 func renderAccessErrorPage(w http.ResponseWriter, cfg Config, reason string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusForbidden)
-	memberAreaURL := cfg.MemberAreaURL
-	if memberAreaURL == "" {
-		memberAreaURL = "https://toolsmandi.com/"
-	}
 	toolName := cfg.ToolName
 	if toolName == "" {
 		toolName = "Claude AI"
 	}
 
 	title := "Access Denied"
-	icon := "🔒"
-	message := fmt.Sprintf("Please open <strong>%s</strong> from the ToolsMandi Member Area — do not bookmark or share direct links.", toolName)
-	cta := "Open Member Area"
+	message := fmt.Sprintf(
+		"You cannot open this tool directly in your browser. Please sign in through your member dashboard and launch <strong>%s</strong> from there.",
+		toolName,
+	)
+	footer := "Direct URL access is not permitted for security reasons."
 
 	switch reason {
 	case "invalid_link":
 		title = "Login Link Invalid"
-		icon = "🔗"
-		message = "This login link is invalid or was already used. Go back to the Member Area and click <strong>Access</strong> again to get a fresh link."
-		cta = "Get New Access Link"
+		message = "This login link is invalid or was already used. Return to your member dashboard and click <strong>Access</strong> again to get a fresh link."
 	case "link_expired":
 		title = "Login Link Expired"
-		icon = "⏱️"
-		message = "This login link has expired. Please return to the Member Area and click <strong>Access</strong> again."
-		cta = "Get New Access Link"
+		message = "This login link has expired. Please return to your member dashboard and click <strong>Access</strong> again."
 	case "ip_mismatch":
 		title = "Security Check Failed"
-		icon = "🛡️"
-		message = "We could not verify your connection (IP mismatch). Turn off VPN/proxy if enabled, then click <strong>Access</strong> again from the Member Area."
-		cta = "Try Again from Member Area"
+		message = "We could not verify your connection (IP mismatch). Turn off VPN/proxy if enabled, then click <strong>Access</strong> again from your member dashboard."
 	case "username_mismatch":
 		title = "Session Error"
-		icon = "⚠️"
-		message = "Your login session could not be verified. Please log in to the Member Area and click <strong>Access</strong> again."
-		cta = "Go to Member Area"
+		message = "Your login session could not be verified. Please sign in through your member dashboard and click <strong>Access</strong> again."
 	case "ip_blocked":
 		title = "IP Blocked"
-		icon = "🚫"
 		message = "Your IP address has been blocked from accessing this tool. Please contact support if you believe this is a mistake."
-		cta = "Contact Support"
+		footer = "If this keeps happening, contact support."
 	case "config_mismatch":
 		title = "Configuration Error"
-		icon = "⚙️"
-		message = "Server configuration mismatch detected (website ID). Please contact the administrator — proxy <code>public_host</code> must match the control panel domain."
-		cta = "Go to Member Area"
+		message = "Server configuration mismatch detected. Please contact the administrator — proxy <code>public_host</code> must match the control panel domain."
+		footer = "If this keeps happening, contact support."
 	case "db_offline":
 		title = "Service Unavailable"
-		icon = "🔧"
 		message = "The tool database is temporarily unavailable. Please try again in a few minutes."
-		cta = "Go to Member Area"
+		footer = "If this keeps happening, contact support."
 	case "missing_params":
 		title = "Invalid Request"
-		icon = "❌"
-		message = "Missing login parameters. Please use the <strong>Access</strong> button from the Member Area — do not open this URL manually."
-		cta = "Go to Member Area"
+		message = "Missing login parameters. Please use the <strong>Access</strong> button from your member dashboard — do not open this URL manually."
 	}
 
 	fmt.Fprintf(w, `<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>%s — %s</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Outfit',system-ui,sans-serif;background:radial-gradient(circle at center,#1a1f2e 0%%,#0d1117 100%%);color:#e6edf3;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{max-width:480px;width:100%%;padding:36px 32px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;text-align:center;box-shadow:0 24px 48px rgba(0,0,0,0.4)}
-.icon{font-size:52px;margin-bottom:16px;line-height:1}
-h1{font-size:26px;font-weight:700;margin-bottom:14px;color:#f0f6fc}
-p{font-size:15px;color:#8b949e;line-height:1.65;margin-bottom:28px}
-p strong{color:#c9d1d9}
-a{display:inline-block;padding:13px 28px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-weight:600;text-decoration:none;border-radius:12px;font-size:15px;transition:transform .15s}
-a:hover{transform:scale(1.03)}
-code{font-size:12px;background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px}
-.hint{margin-top:20px;font-size:13px;color:#6e7681}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:radial-gradient(circle at 50%% 30%%,#eef2f7 0%%,#f8fafc 55%%,#ffffff 100%%);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.card{
+  max-width:460px;width:100%%;padding:48px 40px 40px;
+  background:#fff;border-radius:24px;text-align:center;
+  box-shadow:0 12px 40px rgba(15,23,42,0.08),0 2px 8px rgba(15,23,42,0.04);
+  border:1px solid #eef2f6;
+}
+.icon-wrap{
+  width:64px;height:64px;margin:0 auto 18px;border-radius:50%%;
+  background:#fee2e2;display:flex;align-items:center;justify-content:center;
+}
+.icon-wrap svg{width:28px;height:28px;stroke:#ef4444;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.badge{
+  display:inline-block;margin-bottom:14px;padding:6px 12px;border-radius:999px;
+  background:#eef2f6;color:#475569;font-size:11px;font-weight:700;letter-spacing:.06em;
+}
+h1{font-size:28px;font-weight:700;color:#0f172a;margin-bottom:14px;letter-spacing:-.02em}
+p.msg{font-size:15px;color:#64748b;line-height:1.7;margin-bottom:0}
+p.msg strong{color:#0f172a;font-weight:600}
+hr{border:none;border-top:1px solid #e8edf2;margin:28px 0 18px}
+.footer{font-size:13px;color:#94a3b8;line-height:1.5}
+code{font-size:12px;background:#f1f5f9;color:#334155;padding:2px 6px;border-radius:4px}
 </style></head>
 <body><div class="card">
-<div class="icon">%s</div>
+<div class="icon-wrap">
+<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+</div>
+<div class="badge">PROTECTED ACCESS</div>
 <h1>%s</h1>
-<p>%s</p>
-<a href="%s">%s</a>
-<p class="hint">If this keeps happening, contact support.</p>
-</div></body></html>`, title, toolName, icon, title, message, memberAreaURL, cta)
+<p class="msg">%s</p>
+<hr>
+<p class="footer">%s</p>
+</div></body></html>`, title, toolName, title, message, footer)
 }
 
 func securityPingHandler(w http.ResponseWriter, r *http.Request) {
