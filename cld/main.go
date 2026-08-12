@@ -1900,11 +1900,21 @@ func main() {
 			return
 		}
 
-		// 2.5 Root → Google Flow home
+		// 2.5 Root → home (require session first — no direct open without aMember)
 		if r.URL.Path == "/" {
+			if !usesCookieFileMode(cfg) {
+				if rejectIfIPBlocked(w, r, cfg) {
+					return
+				}
+				if _, authErr := getAuthenticatedUser(r, cfg); authErr != nil {
+					log.Printf("[AUTH] Unauthenticated: / (%v)", authErr)
+					renderAccessDeniedPage(w, cfg)
+					return
+				}
+			}
 			home := cfg.HomePath
 			if home == "" {
-				home = "/fx/tools/flow"
+				home = "/new"
 			}
 			http.Redirect(w, r, home, http.StatusFound)
 			return
